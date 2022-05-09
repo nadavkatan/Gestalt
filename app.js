@@ -17,7 +17,7 @@ frame.on(
     wrong = false;
     let correct = false;
     //track the levels progress
-    let level = 10;
+    let level = 6;
 // initialize the var that contains the element id's of the elements selected by the user
     let selectedPoints;
 
@@ -209,7 +209,42 @@ frame.on(
         }
         
       ],
-    }
+    },
+    {
+      level: 6,
+      numAnswersSubmitted: 10,
+      answers: [
+        {
+          answer: [480, 482],
+          timesChosen: 10,
+          percentage: 100,
+          answerClass: 'common-region',
+          principle: 'Common region'
+        },
+        { 
+          answer: [516, 518],
+          timesChosen: 10,
+          percentage: 100,
+          answerClass: 'common-region',
+          principle: 'Common region'
+        },
+        {
+          answer: [552, 554],
+          timesChosen: 10,
+          percentage: 100,
+          answerClass: 'common-region',
+          principle: 'Common region'
+        },
+        {
+          answer: [588, 590],
+          timesChosen: 10,
+          percentage: 100,
+          answerClass: 'common-region',
+          principle: 'Common region'
+        }
+        
+      ],
+    },
     ];
   
     
@@ -640,7 +675,7 @@ frame.on(
 
     let pages = new Pages({
       pages: [
-        { page: level10 },
+        { page: level6 },
         { page: level2 },
         { page: level3 },
         { page: level4 },
@@ -1066,21 +1101,6 @@ let dots=[]
           matchModalTextToLevel(level, sorted) 
         });
 
-    // function createLevel5EventListeners() {
-    //   level5Buttons.forEach((button) => {
-    //     button.addEventListener("click", () => {
-    //       button.color = blue;
-    //       console.log(button.id);
-    //       if (!userSelectedbtns.includes(button.id)) {
-    //         userSelectedbtns.push(button.id);
-    //       }
-    //       console.log(userSelectedbtns);
-    //       stage.update();
-    //     });
-    //   });
-    // }
-    // createLevel5EventListeners();
-
     function resetLevel5(){
         level5Buttons.forEach((button) => {
             button.color = red;
@@ -1096,10 +1116,9 @@ let dots=[]
     let level6Xpos = 150;
     let level6DotXpos = 80;
     let level6DotStep = 140;
-    let leve6DotsIdGroup = [];
-    let level6DotsIds = [];
+    // let level6DotsIds = [];
     let level6SelectedDots = [];
-    let level6Dots = [];
+    // let level6Dots = [];
 
     // a function to create the lattice for level 6
     function createLevel6Lattice() {
@@ -1116,19 +1135,20 @@ let dots=[]
         }).loc(level6Xpos, 400, level6);
 
         for (let j = 0; j < 2; j++) {
-          var dot = new Circle({
+          let dot = new Circle({
             radius: 10,
             color: yellow
-          }).loc(level6DotXpos, 400, level6).cur();
+          }).loc(level6DotXpos, 400, level6).cur()
+          .tap(()=>{
+            dot.color = red;
+            level6SelectedDots.push(dot.id);
+            stage.update();
+          })
 
           level6DotXpos += level6DotStep;
-          level6Dots.push(dot);
-          leve6DotsIdGroup.push(dot.id);
         }
         level6Xpos += level6Step;
         level6DotXpos -= 50;
-        level6DotsIds.push(leve6DotsIdGroup);
-        leve6DotsIdGroup = [];
       }
 
       new Button({
@@ -1136,37 +1156,21 @@ let dots=[]
       })
         .loc(400, 600, level6)
         .tap(function () {
-          if (selectedRects.length === 1) {
-            alert("Correct! That's the lowest level group");
-          } else {
-            let newCheckArrays = new CheckArrays();
-            newCheckArrays.checkSelection(
-              level6SelectedDots,
-              level6DotsIds,
-              2
-            );
-          }
+          let sorted = level6SelectedDots.sort((a,b) => {
+            return a -b
+          })
+          matchModalTextToLevel(level, sorted)
         });
-
-      level6Dots.forEach((dot) => {
-        dot.addEventListener("click", () => {
-          dot.color = red;
-          level6SelectedDots.push(dot.id);
-          console.log(level6SelectedDots)
-          stage.update();
-        });
-      });
-      return level6Dots;
     }
     createLevel6Lattice();
 
-    function resetLevel6(){
-        level6Dots.forEach((dot) => {
-        dot.color = black;
-        })
-        level6SelectedDots=[];
-        stage.update();
-    }
+    // function resetLevel6(){
+    //     level6Dots.forEach((dot) => {
+    //     dot.color = black;
+    //     })
+    //     level6SelectedDots=[];
+    //     stage.update();
+    // }
 
 
     // === LEVEL 7 === PARALLELISM ===//
