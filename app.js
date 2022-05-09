@@ -1580,10 +1580,6 @@ let dots=[]
         let TimeProxBoundaries = [];
          if(notes.length >= 3){
           for(let i=0; i<notes.length-2; i++){
-            // console.log("first note: ", notes[i].x);
-            // console.log("second note: ", notes[i+1].x);
-            // console.log("third note: ", notes[i+2].x);
-            // console.log((notes[i+1].x - notes[i].x) * 2, (notes[i+2].x - notes[i+1].x))
             if((notes[i+1].x - notes[i].x) * 2 < (notes[i+2].x - notes[i+1].x)){
               TimeProxBoundaries.push({boundary_after_note: i+2, size: notes[i+2].x - notes[i+1].x });
             }
@@ -1599,10 +1595,6 @@ let dots=[]
           let PitchProxBoundaries = [];
           if(notes.length >= 3){
             for(let i=0; i<notes.length-2; i++){
-              // console.log("first note: ", notes[i].y);
-              // console.log("second note: ", notes[i+1].y);
-              // console.log("third note: ", notes[i+2].y);
-              // console.log((notes[i+1].y - notes[i].y) * 2, (notes[i+2].y - notes[i+1].y))
               if((notes[i].y - notes[i+1].y) * 2 < (notes[i+1].y - notes[i+2].y)){
                 PitchProxBoundaries.push({boundary_after_note: i+2, size: notes[i+1].y - notes[i+2].y });
               }
@@ -1625,29 +1617,25 @@ let dots=[]
   let addNote = new Button({
     label: "ADD NOTE"
   }).loc(800,600, level10).tap(function(){
-    let newNote = new Circle({
+     newNote = new Circle({
      color: yellow,
      radius: 15
-    }).loc(800, 550, level10).drag();
+    }).loc(800, 550, level10).drag()
     stage.update();
-    console.log(newNote);
   })
 
- //  if(newNote){
- //    newNote.on("dblclick", ()=>{
- //      newNote.removeFrom(stage);
- //      stage.update();
- //    })
- //  }
 
-  let note = new Blob({
+  let note = new Circle({
    color: yellow,
    radius: 15,
- }).loc(100, 100, level10).drag().animate({
-   props:{
-     shape
-   }
- })  
+   interactive: false
+ }).loc(100, 100, level10).drag()
+
+ note.on('dblclick', ()=>{
+   console.log("double");
+   note.removeFrom(level10);
+   stage.update();
+ })
 
 
  // === LEVEL 11 ANIMATION GAME === //
