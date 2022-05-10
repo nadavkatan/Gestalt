@@ -12,13 +12,9 @@ frame.on(
     let shape;
     // array to store the coordinates of the line drawn by the user
     let lineCords = [];
-    // variable to be set true or false according to collision of the line cords and the lattices cords
-    let collided;
-    wrong = false;
-    let correct = false;
     //track the levels progress
     let level = 1;
-// initialize the var that contains the element id's of the elements selected by the user
+    // initialize the var that contains the element id's of the elements selected by the user
     let selectedPoints;
 
     // static possible answers.Will be replaced with a dynamic one in a database, once the backend will be developed. 
@@ -423,7 +419,7 @@ frame.on(
         }
     ]
 
-    function arrayEquals(a, b) {
+    const arrayEquals=(a, b) =>{
       return Array.isArray(a) &&
         Array.isArray(b) &&
         a.length === b.length &&
@@ -472,61 +468,8 @@ frame.on(
     function matchModalTextToLevel(level, selectedPoints){
       modalTextContainer.textContent = getResponseText(selectedPoints)
       modalLevel1.style.display = "block";
-      // level++
     }
 
-    // If the modal of creates a question, create the answers as buttons as well as their behavior
-    function createOptionsBtns(options){
-      let optionsBtnsContainer = document.createElement("div");
-      optionsBtnsContainer.classList.add("row")
-      for(let i = 0; i < options.length; i++){
-        let optionBtn = document.createElement('button');
-        optionBtn.classList.add('btn', 'btn-primary', 'col-5', 'm-3');
-        optionBtn.textContent = options[i].btnText;
-        optionBtn.addEventListener('click', ()=>{
-          if(options[i].correct){
-            optionBtn.classList.remove('btn-primary');
-            optionBtn.classList.add('btn-success');
-            let goodJob = document.createElement('p');
-            goodJob.textContent="Good job!";
-            goodJob.style.color="red";
-            optionsBtnsContainer.prepend(goodJob);
-            setTimeout(()=>{
-              nextLevelBtn.style.display = 'block';
-              modalFooter.removeChild(optionsBtnsContainer)
-            },1500)
-          }else{
-            optionBtn.classList.remove('btn-primary');
-            optionBtn.classList.add('btn-danger'); 
-            let tryAgain = document.createElement('p');
-            tryAgain.textContent="Give it another try!";
-            tryAgain.style.color="red";
-            optionsBtnsContainer.prepend(tryAgain);
-            setTimeout(()=>{
-              optionBtn.classList.remove('btn-danger'); 
-              optionBtn.classList.add('btn-primary');
-              optionsBtnsContainer.removeChild(tryAgain)
-            },2000)
-          }
-        })
-        optionsBtnsContainer.appendChild(optionBtn);
-      }
-      modalFooter.prepend(optionsBtnsContainer);
-
-    }
-
-    // //for level 8, the user needs to submit their answer to an input and press a button 
-    // function inputForLevel8(){
-    //   if(level===8){
-    //     nextLevelBtn.style.display = 'none';
-    //     const input = document.createElement('input');
-    //     const submitBtn = document.createElement('button');
-    //     submitBtn.classList.add('btn-primary', 'btn');
-    //     modalFooter.append(input, submitBtn);
-    //   }
-    // }
-
-   
    // customizing the cursor
     document.addEventListener("mousemove", e=>{
       cursor.setAttribute("style", "top: " + (e.pageY-15) + "px; left: " + (e.pageX-12) + "px")
@@ -538,172 +481,6 @@ frame.on(
         cursor.classList.remove('expand');
       },500)
     })
-
- // a function to get the mean points of an array of coordinates, to be used in the checkUserSelection function
-    function getMeans(arr){
-      let highestY = Math.max.apply(
-        Math,
-        arr.map(function (o) {
-          return o.y;
-        })
-      );
-      let lowestY = Math.min.apply(
-        Math,
-        arr.map(function (o) {
-          return o.y;
-        })
-      );
-
-      let highestX = Math.max.apply(
-        Math,
-        arr.map(function (o) {
-          return o.x;
-        })
-      );
-      let lowestX = Math.min.apply(
-        Math,
-        arr.map(function (o) {
-          return o.x;
-        })
-      );
-
-        let top;
-        let bottom;
-        let left;
-        let right;
-
-      for(let i = 0; i < arr.length; i++){
-        if(arr[i].x == highestX) {right = arr[i]}
-        if(arr[i].x == lowestX) {left = arr[i]}
-        if(arr[i].y == highestY) {bottom = arr[i]}
-        if(arr[i].y == lowestY) {top = arr[i]}
-      }
-
-      return{
-        meanY : (highestY + lowestY) / 2,
-        meanX : (highestX + lowestX) / 2,
-        highestX:highestX,
-        lowestX:lowestX,
-        highestY:highestY,
-        lowestY:lowestY,
-        top:top,
-        bottom:bottom,
-        left:left,
-        right:right,
-      }
-
-
-    
-    }
-    
-        // a function that check's if the user selected the right lattice elements by comparing the lines cords with the lattice cords
-    // It checks for collision and whether the center of drawn circle is within the lattice cords. If so, user is correct.
-    
-    function checkUserSelection(latticesCords, selectedPoints) {
-   
-      const {meanX, meanY} = getMeans(lineCords);
-
-      //Check for collision
-      for (let i = 0; i < latticesCords.length; i++) {
-        lineCords.forEach((element) => {
-          if (
-            Number(element.x) > Number(latticesCords[i].x1) &&
-            Number(element.x) < Number(latticesCords[i].x2) &&
-            Number(element.y) > Number(latticesCords[i].y1) &&
-            Number(element.y) < Number(latticesCords[i].y2)
-          ) {
-            collided = true;
-            console.log("Collided");
-          }
-        });
-
-        //If no collision,check that the the circle center is withtin the lattice terrain
-        if (
-          !collided &&
-          meanX > latticesCords[i].x1 &&
-          meanX < latticesCords[i].x2 &&
-          meanY > latticesCords[i].y1 &&
-          meanY < latticesCords[i].y2
-        ) {
-          correct = true;
-          console.log("Correct is now " + true);
-        }
-      }
-
-      //ui response to answer's correctness
-      if (correct) {
-        console.log("Correct");
-        matchModalTextToLevel(level, selectedPoints);
-        modalLevel1.style.display = "block";
-      } else {
-        alert("Wrong");
-        shape.removeFrom(stage);
-        stage.update();
-        lineCords = [];
-      }
-
-      //reset variables
-      collided = false;
-      correct = false;
-      console.log("Correct is now " + correct);
-    }
-
-
-    //A class object that compares the array of the user's selected buttons with a possible correct answer array
-    class CheckArrays {
-        constructor(controlArr = [], isCorrect = false) {
-          this.controlArr = controlArr;
-          this.isCorrect = isCorrect;
-          this.checkSelection = function (a, b, num, num2) {
-            if (a.length === 0) {
-              alert("Wrong, no element selected");
-            } else {
-              for (let i = 0; i < b.length; i++) {
-                for (let j = 0; j < a.length; j++) {
-                  if (b[i].includes(a[j])) {
-                    this.controlArr.push("true");
-                  } else {
-                    this.controlArr.push("false");
-                  }
-                }
-                console.log(this.controlArr);
-                if (!num2) {
-                  if (
-                    this.controlArr.length == num &&
-                    !this.controlArr.includes("false")
-                  ) {
-                    this.isCorrect = true;
-                  }
-                } else {
-                  if (
-                    this.controlArr.length == num ||
-                    (this.controlArr.length == num2 &&
-                      !this.controlArr.includes("false"))
-                  ) {
-                    this.isCorrect = true;
-                  }
-                }
-                this.controlArr = [];
-              }
-              if (this.isCorrect == true) {
-                console.log("Correct");
-                matchModalTextToLevel(level);
-                modalLevel1.style.display = "block";
-              } else {
-                alert("Worng");
-                if(level===5)resetLevel5();
-               if(level===6) resetLevel6();
-              }
-            }
-          };
-        }
-      }
-
-    // set the cursor to painting on the dynamic drawing levels
-    // if(level < 4){
-    //     document.body.style.cursor = "cell";
-
-    // }
 
     // Create the levels pages
     let level1 = new Page(stageW, stageH, black).cur('none');
@@ -769,7 +546,6 @@ frame.on(
     }).addTo();
 
    
-
     //set up the dynamic drawing functionality
     let ticker;
     const dampX = new Damp(null, 0.1);
@@ -848,6 +624,7 @@ frame.on(
       return inside;
   };
 
+  // Get rid of duplicated arrays in the multi-dimensional line cords array
   const multiDimensionalUnique=(arr)=> {
     let uniques = [];
     let itemsFound = {};
@@ -860,6 +637,8 @@ frame.on(
     return uniques;
 }
 
+// The line cords are initially recieved as an array with objects. This function removes the objects and sets each point in an array. All the points are then stored in a 
+// higher level array, returning a two-dimensional array of the line cords.
   const convertToArr = (lineCords) =>{
     let arr=[]
     for(let i=0; i < lineCords.length; i++){
@@ -869,6 +648,7 @@ frame.on(
     return arr;
   }
   
+  //A function that utilizes all utility functions and returns an array with the dots selected by the user
   const getSelectedPoints = (latticeDots, lineCords)=>{
     let cords = convertToArr(lineCords);
     let cordsWithoutDuplicates = multiDimensionalUnique(cords);
@@ -918,7 +698,7 @@ frame.on(
   
         console.log(levelDotsCords);
       }
-let dots=[]
+    let dots=[]
       // lattice with circles
       function createLattice(
         Xstart,
@@ -963,9 +743,8 @@ let dots=[]
 
     let level1LatticeCords = [];
     let level1DotsCords = {name: 'level1', cords:[]};
-    // let level1DotsCords = [];
-          // args: beginning x position, beginning y position, number of rows, munber of cols, gap magnitude (step),color,level,levelLatticeCords
 
+    // args: beginning x position, beginning y position, number of rows, munber of cols, gap magnitude (step),color,level,levelLatticeCords
     createLattice(250, 300, 6, 4, 50, green, level1, level1LatticeCords, level1DotsCords);
     createLattice(600, 200, 6, 4, 50, green, level1, level1LatticeCords, level1DotsCords);
 
@@ -973,7 +752,6 @@ let dots=[]
 
     let level2LatticeCords = [];
     let level2DotsCords = {name: 'level2', cords:[]};
-    // let level2DotsCords = [];
 
     createLattice(430, 400, 4, 4, 50, blue, level2, level2LatticeCords,level2DotsCords);
     createLattice(430, 200, 4, 4, 50, yellow, level2, level2LatticeCords,level2DotsCords);
@@ -982,7 +760,6 @@ let dots=[]
 
     let level3LatticeCords = [];
     let level3DotsCords = {name: 'level3', cords:[]};
-    // let level3DotsCords = [];
 
     createSquareLattice(530, 300, 4, 4, 50, blue, level3, level3LatticeCords,level3DotsCords);
     createLattice(340, 310, 4, 4, 50, blue, level3, level3LatticeCords, level3DotsCords);
@@ -994,80 +771,11 @@ let dots=[]
     createLattice(700, 150, 7, 1, 50, red, level4,level4LatticeCords,level4DotsCords )
     createLattice(350, 500, 1, 15, 50, red, level4,level4LatticeCords,level4DotsCords )
 
-    // Declare initial variables for level 4
-    let level4PossibleAnswers = [[], []]; // horizontal ids is [1], vertical ids is [0]
-    let XPosVertical = 530;
-    let YPosVertical = 450;
-    let level4XPos = 180;
-    let level4Buttons = []
-    let level4YPos = 500;
-    let level4Step = 50;
-    let level4UserSelectedBtns = [];
-
-    // a function to create the lattice for level 4
-    function createLevel4Btns() {
-      for (let i = 0; i < 5; i++) {
-        let verticalButton = new Circle({
-          radius: 10,
-          color: red,
-        })
-          .loc(XPosVertical, YPosVertical, level4)
-          .cur();
-        level4PossibleAnswers[0].push(verticalButton.id);
-
-        verticalButton.addEventListener("click", () => {
-          level4UserSelectedBtns.push(verticalButton.id);
-          verticalButton.color = blue;
-          stage.update();
-        });
-
-        for (let j = 0; j < 3; j++) {
-          let horizontalButton = new Circle({
-            radius: 10,
-            color: red,
-          })
-            .loc(level4XPos, level4YPos, level4)
-            .cur();
-          level4XPos += level4Step;
-          level4PossibleAnswers[1].push(horizontalButton.id);
-
-          if (level4PossibleAnswers[1].length === 8) {
-            level4PossibleAnswers[0].push(horizontalButton.id);
-          }
-
-          horizontalButton.addEventListener("click", () => {
-            level4UserSelectedBtns.push(horizontalButton.id);
-            horizontalButton.color = blue;
-            stage.update();
-          });
-        }
-        YPosVertical -= level4Step;
-      }
-    }
-    // createLevel4Btns();
-
-    function resetLevel4(){
-        level5Buttons.forEach((button) => {
-            button.color = red;
-        })
-        stage.update();
-        userSelectedbtns=[]
-    }
-
     new Button({
       label: "SUBMIT",
     })
       .loc(430, 600, level4)
-      .tap(function () {
-        // let newCheckArrays = new CheckArrays();
-        // newCheckArrays.checkSelection(
-        //   level4UserSelectedBtns,
-        //   level4PossibleAnswers,
-        //   6,
-        //   15
-        // );
-        // console.log(level4PossibleAnswers);
-        // console.log(level4UserSelectedBtns);
+      .tap(()=> {
         for(let i=0; i< dots.length; i++){
           dots[i].id == 372? dots[i].color = blue : red
         }
@@ -1147,14 +855,6 @@ let dots=[]
           matchModalTextToLevel(level, sorted) 
         });
 
-    function resetLevel5(){
-        level5Buttons.forEach((button) => {
-            button.color = red;
-        })
-        stage.update();
-        userSelectedbtns=[]
-    }
-
     // === LEVEL 6 COMMON REGION === //
 
     // declare initial variables for level 6
@@ -1162,9 +862,7 @@ let dots=[]
     let level6Xpos = 150;
     let level6DotXpos = 80;
     let level6DotStep = 140;
-    // let level6DotsIds = [];
     let level6SelectedDots = [];
-    // let level6Dots = [];
 
     // a function to create the lattice for level 6
     function createLevel6Lattice() {
@@ -1210,19 +908,9 @@ let dots=[]
     }
     createLevel6Lattice();
 
-    // function resetLevel6(){
-    //     level6Dots.forEach((dot) => {
-    //     dot.color = black;
-    //     })
-    //     level6SelectedDots=[];
-    //     stage.update();
-    // }
-
-
     // === LEVEL 7 === PARALLELISM ===//
 
     // Set initial level variables
-    // let level7SquigglesId = [];
     let selectedSquiggles = [];
     let squiggles = [];
     let level7Points = [
