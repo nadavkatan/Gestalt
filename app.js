@@ -17,7 +17,7 @@ frame.on(
     wrong = false;
     let correct = false;
     //track the levels progress
-    let level = 6;
+    let level = 1;
 // initialize the var that contains the element id's of the elements selected by the user
     let selectedPoints;
 
@@ -243,6 +243,87 @@ frame.on(
           principle: 'Common region'
         }
         
+      ],
+    },
+    {
+      level: 7,
+      numAnswersSubmitted: 10,
+      answers: [
+        {
+          answer: [598, 637],
+          timesChosen: 10,
+          percentage: 100,
+          answerClass: 'parallelism',
+          principle: 'Parallelism'
+        },
+        { 
+          answer: [676, 715],
+          timesChosen: 10,
+          percentage: 100,
+          answerClass: 'parallelism',
+          principle: 'Parallelism'
+        },
+        {
+          answer: [754, 793],
+          timesChosen: 10,
+          percentage: 100,
+          answerClass: 'parallelism',
+          principle: 'Parallelism'
+        },        
+      ],
+    },
+    {
+      level: 8,
+      numAnswersSubmitted: 10,
+      answers: [
+        {
+          answer: [838, 877],
+          timesChosen: 10,
+          percentage: 100,
+          answerClass: 'symmetry',
+          principle: 'Symmetry'
+        },
+        { 
+          answer: [916, 955],
+          timesChosen: 10,
+          percentage: 100,
+          answerClass: 'symmetry',
+          principle: 'Symmetry'
+        },
+        {
+          answer: [994, 1033],
+          timesChosen: 10,
+          percentage: 100,
+          answerClass: 'symmetry',
+          principle: 'Symmetry'
+        },        
+      ],
+    },
+    {
+      level: 9,
+      numAnswersSubmitted: 10,
+      answers: [
+        {
+          answer: [1078, 1080, 1082, 1084, 1086, 1088, 1090],
+          timesChosen: 8,
+          percentage: 80,
+          answerClass: 'similarity2',
+          principle: 'Similarity'
+        },
+        { 
+          answer: [1092, 1094, 1096, 1098, 1100, 1102, 1104],
+          timesChosen: 8,
+          percentage: 80,
+          answerClass: 'similarity2',
+          principle: 'Similarity'
+        },
+        {
+          answer: [1078, 1080, 1082, 1084, 1086, 1088, 1090,1092, 1094, 1096, 1098, 1100, 1102, 1104],
+          timesChosen: 2,
+          percentage: 20,
+          answerClass: 'hierarchy-continuity2',
+          principle: 'Continuity'
+        },        
       ],
     },
     ];
@@ -496,10 +577,6 @@ frame.on(
         if(arr[i].x == lowestX) {left = arr[i]}
         if(arr[i].y == highestY) {bottom = arr[i]}
         if(arr[i].y == lowestY) {top = arr[i]}
-        // if(arr[i].x == highestX) {right = 'right'}
-        // if(arr[i].x == lowestX) {left = 'left'}
-        // if(arr[i].y == highestY) {top = 'top'}
-        // if(arr[i].x == lowestY) {bottom = 'bottom'}
       }
 
       return{
@@ -675,7 +752,7 @@ frame.on(
 
     let pages = new Pages({
       pages: [
-        { page: level6 },
+        { page: level1 },
         { page: level2 },
         { page: level3 },
         { page: level4 },
@@ -752,9 +829,6 @@ frame.on(
             matchModalTextToLevel(level, selectedPoints)      
             defualt: return;
         }
-        // shape.removeFrom(stage);
-        // stage.update();
-        // level++
       }
     });
 
@@ -808,35 +882,7 @@ frame.on(
     }
     return selectedPoints
   }
-  
-    // stage.on("stagemouseup", () => {
-    //   if (level > 0 && level < 5) {
-    //     Ticker.remove(ticker);
-
-    //     clearInterval(getUpdatingPenCords);
-
-    //     switch (level) {
-    //       case 1:
-    //       selectedPoints = getSelectedPoints(level1DotsCords, lineCords)
-    //     matchModalTextToLevel(level, selectedPoints)
-    //         break;
-    //       case 2:
-    //          selectedPoints = getSelectedPoints(level2DotsCords, lineCords)
-    //          matchModalTextToLevel(level, selectedPoints)
-    //         break;
-    //       case 3:
-    //         selectedPoints = getSelectedPoints(level3DotsCords, lineCords)
-    //         matchModalTextToLevel(level, selectedPoints)         
-    //            break;
-    //        case 4:
-    //         selectedPoints = getSelectedPoints(level4DotsCords, lineCords)
-    //         matchModalTextToLevel(level, selectedPoints)      
-    //         defualt: return;
-    //     }
-    //     shape.removeFrom(stage);
-    //   }
-    // });
-
+ 
 
     // functions for creating lattices
     // lattice with squares
@@ -1176,7 +1222,7 @@ let dots=[]
     // === LEVEL 7 === PARALLELISM ===//
 
     // Set initial level variables
-    let level7SquigglesId = [];
+    // let level7SquigglesId = [];
     let selectedSquiggles = [];
     let squiggles = [];
     let level7Points = [
@@ -1233,30 +1279,25 @@ let dots=[]
       yPos,
       xPos,
       pageNum,
-      levelSquigglesId
     ) {
-      let squiggleIdGroup = [];
       for (let i = 0; i < num; i++) {
-        var squiggle = new Squiggle({
+        let squiggle = new Squiggle({
           interactive: false,
           color: red,
           thickness: 5,
           points: levelPoints[i],
         })
           .loc(xPos[i], yPos, pageNum)
-          .cur();
+          .cur()
+          .tap(()=>{
+            squiggle.color = blue;
+          squiggle.thickness = 10;
+          console.log(squiggle.id);
+          if (!selectedSquiggles.includes(squiggle.id))
+            selectedSquiggles.push(squiggle.id);
+          stage.update();
+          })
         squiggles.push(squiggle);
-
-        if (squiggleIdGroup.length < 2) {
-          squiggleIdGroup.push(squiggle.id);
-          if (levelSquigglesId.length == num / 2 - 1) {
-            levelSquigglesId.push(squiggleIdGroup);
-          }
-        } else if (squiggleIdGroup.length === 2) {
-          levelSquigglesId.push(squiggleIdGroup);
-          squiggleIdGroup = [];
-          squiggleIdGroup.push(squiggle.id);
-        }
       }
     }
     createSquiggles(
@@ -1265,33 +1306,20 @@ let dots=[]
       yPosLevel7,
       xPosLevel7,
       level7,
-      level7SquigglesId
     );
 
-    //Create click event listeners for all the squiggles that store their id's in an array
-    function createEventListenersForSquiggles() {
-      squiggles.forEach((squiggle) => {
-        squiggle.on("click", function () {
-          squiggle.color = blue;
-          squiggle.thickness = 10;
-          zog(squiggle.id);
-          if (!selectedSquiggles.includes(squiggle.id))
-            selectedSquiggles.push(squiggle.id);
-          stage.update();
-        });
-      });
-    }
-    createEventListenersForSquiggles();
 
     // a button to submit the user's answer and fire the checkSelection method of the CheckArrays class
     new Button({
       label: "SUBMIT",
     })
       .loc(400, 600, level7)
-      .tap(function () {
-        zog(selectedSquiggles);
-        let newCheckArrays = new CheckArrays();
-        newCheckArrays.checkSelection(selectedSquiggles, level7SquigglesId, 2);
+      .tap(()=> {
+
+        let sorted = selectedSquiggles.sort((a,b) => {
+          return a -b
+        })
+        matchModalTextToLevel(level,sorted)
       });
 
     // === LEVEL 8 === SYMMETRY === //
@@ -1343,7 +1371,6 @@ let dots=[]
     ];
     let yPosLevel8 = 350;
     let xPosLevel8 = [180, 260, 340, 420, 500, 595, 690, 800];
-    let level8SquigglesId = [];
 
     // Call the function to create the lattice for level 8
     createSquiggles(
@@ -1352,18 +1379,17 @@ let dots=[]
       yPosLevel8,
       xPosLevel8,
       level8,
-      level8SquigglesId
     );
-    createEventListenersForSquiggles();
 
     new Button({
       label: "SUBMIT",
     })
       .loc(430, 600, level8)
-      .tap(function () {
-        zog(selectedSquiggles);
-        let newCheckArrays = new CheckArrays();
-        newCheckArrays.checkSelection(selectedSquiggles, level8SquigglesId, 2);
+      .tap(()=> {
+        let sorted = selectedSquiggles.sort((a,b) => {
+          return a -b
+        })
+        matchModalTextToLevel(level,sorted)
       });
 
     // === LEVEL 9 HIERARCHY - CONTINUITY & SIMILARITY === //
@@ -1372,10 +1398,7 @@ let dots=[]
     let step = 110;
     let xPos = 300;
     let yPos = 210;
-    let blueGroupIds = [];
-    let greenGroupIds = [];
     let rects = [];
-    let rectsIds = [];
     let selectedRects = [];
 
     // a function to create the lattice for level 9
@@ -1384,22 +1407,18 @@ let dots=[]
       for (let i = 0; i < 4; i++) {
         let rect = new Rectangle(100, 100, "blue").loc(xPos, 100, level9);
         rects.push(rect);
-        blueGroupIds.push(rect.id);
         xPos += step;
       }
       //Create blue rects of the left column
       for (let i = 0; i < 3; i++) {
         let rect = new Rectangle(100, 100, "blue").loc(300, yPos, level9);
         rects.push(rect);
-        blueGroupIds.push(rect.id);
         yPos += step;
       }
-      rectsIds.push(blueGroupIds);
       //Create green rects of the left column
       for (let i = 0; i < 1; i++) {
         let rect = new Rectangle(100, 100, "green").loc(300, yPos, level9);
         rects.push(rect);
-        greenGroupIds.push(rect.id);
         yPos += step;
       }
 
@@ -1409,7 +1428,6 @@ let dots=[]
       for (let i = 0; i < 3; i++) {
         let rect = new Rectangle(100, 100, "green").loc(xPos, yPos, level9);
         rects.push(rect);
-        greenGroupIds.push(rect.id);
         xPos += step;
       }
       //Create green rects of the right column
@@ -1418,7 +1436,6 @@ let dots=[]
       for (let i = 0; i < 2; i++) {
         let rect = new Rectangle(100, 100, "green").loc(xPos, yPos, level9);
         rects.push(rect);
-        greenGroupIds.push(rect.id);
         yPos -= step;
       }
       //Last inner green rect
@@ -1428,21 +1445,21 @@ let dots=[]
         level9
       );
       rects.push(rect);
-      greenGroupIds.push(rect.id);
-      rectsIds.push(greenGroupIds);
-    //   console.log(blueGroupIds, greenGroupIds, rects, rectsIds);
+
     }
     createLatticeG();
 
     // Event listeners for the components of level 9
-    function createEventsForRects() {
+    const createEventsForRects=()=> {
       rects.forEach((rect) => {
         rect.on("click", (e) => {
-          rect.color = "red";
+          rect.animate({
+            props:{
+              color: red
+            }
+          })
           stage.update();
           if (!selectedRects.includes(rect.id)) selectedRects.push(rect.id);
-
-          console.log(selectedRects);
         });
       });
     }
@@ -1452,13 +1469,11 @@ let dots=[]
       label: "SUBMIT",
     })
       .loc(400, 670, level9)
-      .tap(function () {
-        if (selectedRects.length === 1) {
-          alert("Correct! That's the lowest level group");
-        } else {
-          let newCheckArrays = new CheckArrays();
-          newCheckArrays.checkSelection(selectedRects, rectsIds, 7);
-        }
+      .tap(()=> {
+        let sorted = selectedRects.sort((a,b) => {
+          return a -b
+        })
+        matchModalTextToLevel(level,sorted)
       });
 
 
@@ -1833,12 +1848,20 @@ createLevel11Lattice();
       switch (level) {
         case 1:
           pages.go(level2);
+        shape.removeFrom(stage);
+      stage.update();
         case 2:
           pages.go(level3);
+          shape.removeFrom(stage);
+          stage.update();
         case 3:
           pages.go(level4);
+          shape.removeFrom(stage);
+          stage.update();
         case 4:
           pages.go(level5);
+          shape.removeFrom(stage);
+          stage.update();
         case 5:
           pages.go(level6);
           break;
@@ -1853,8 +1876,7 @@ createLevel11Lattice();
           pages.go(level9);
           break;
       }
-      shape.removeFrom(stage);
-      stage.update();
+
       level++;
       console.log("level: " + level);
     });
