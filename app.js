@@ -511,10 +511,10 @@ frame.on(
     level9.title = new Label({text: "Level 9", color:white}).loc(100, 100, level9);
 
     let level10 = new Page(stageW, stageH, black).cur('grab');
-    level10.title = new Label({text: "Level 10", color:white}).loc(100, 100, level10);
+    level10.title = new Label({text: "Level 11", color:white}).loc(100, 100, level10);
 
     let level11 = new Page(stageW, stageH, black).cur('grab');
-    level11.title = new Label({text: "Level 11", color:white}).loc(100, 100, level11);
+    level11.title = new Label({text: "Level 10", color:white}).loc(100, 100, level11);
 
     level2.name = "level 2";
     level3.name = "level 3";
@@ -1165,14 +1165,14 @@ frame.on(
       });
 
 
-   // === LEVEL 10 COMPOSE === //
+   // === LEVEL 11 COMPOSE === //
     
     //create stave:
-    new Line({length:1300, color:white}).loc(50, 300, level10);
-    new Line({length:1300, color:white}).loc(50, 350, level10);
-    new Line({length:1300, color:white}).loc(50, 400, level10);
-    new Line({length:1300, color:white}).loc(50, 450, level10);
-    new Line({length:1300, color:white}).loc(50, 500, level10);
+    new Line({length:1300, color:white}).loc(50, 300, level11);
+    new Line({length:1300, color:white}).loc(50, 350, level11);
+    new Line({length:1300, color:white}).loc(50, 400, level11);
+    new Line({length:1300, color:white}).loc(50, 450, level11);
+    new Line({length:1300, color:white}).loc(50, 500, level11);
 
     // the clef is a custome made squggle with the following points:
     let clefPoints = 
@@ -1190,20 +1190,20 @@ frame.on(
      points:clefPoints,
      color: orange,
      interactive: false
-   }).loc(-10,410, level10);
+   }).loc(-10,410, level11);
 
    let circles;
 
    let playBtn = new Button({
      label: "PLAY",
    })
-     .loc(430, 600, level10)
+     .loc(430, 600, level11)
      .tap(function () {
        console.log(`x: ${note.dragMouseX}, y: ${note.dragMouseY}`);
         circles = 
        //The ZIM page element has default children. The notes added by the user will be children of the page starting from the 10th index.
        // filter out the children that are not notes added by the user
-       level10.children.filter((child, index) => index >=11)
+       level11.children.filter((child, index) => index >=11)
        //map through these notes and return their coordinates
        .map(child => {
          return {x: child.x.toFixed(), y: child.y.toFixed()}
@@ -1314,7 +1314,7 @@ frame.on(
 
        new Button({
          label: "Check"
-       }).loc(800,700, level10).tap(function(){
+       }).loc(800,700, level11).tap(function(){
         checkPitchProx(circles);
         checkTimeProx(circles);
       })
@@ -1323,11 +1323,11 @@ frame.on(
        let newNote;
   let addNote = new Button({
     label: "ADD NOTE"
-  }).loc(800,600, level10).tap(function(){
+  }).loc(800,600, level11).tap(function(){
      newNote = new Circle({
      color: yellow,
      radius: 15
-    }).loc(800, 550, level10).drag()
+    }).loc(800, 550, level11).drag()
     stage.update();
   })
 
@@ -1336,11 +1336,11 @@ frame.on(
    color: yellow,
    radius: 15,
    interactive: false
- }).loc(100, 100, level10).drag()
+ }).loc(100, 100, level11).drag()
 
  note.on('dblclick', ()=>{
    console.log("double");
-   note.removeFrom(level10);
+   note.removeFrom(level11);
    stage.update();
  })
 
@@ -1486,40 +1486,72 @@ const getRandom = ()=>{
  }
 }
 
+const animate = ()=>{
+  let random = getRandom()
+  previous = random
+  console.log(random)
+  elements.forEach((element, i)=>{
+    element.animate({
+      props:{
+        x: animations[random].x[i],
+        y:animations[random].y[i],
+        shape: animations[random].shape[i],
+        color: animations[random].color[i]
+        // x: animations[4].x[i],
+        // y:animations[4].y[i],
+        // shape: animations[4].shape[i],
+        // color: animations[4].color[i],
+        // scale: animations[4].scale[i]
+      }
+    })
+  })
+}
+
 let createLevel11Lattice = ()=>{
   for(let column = 0; column<columns.length; column++){
     for(let row = 0; row<rows.length; row++){
       let element = new Blob({
         points: blobPoints,
         interactive: false
-      }).loc(columns[column],rows[row], level11);
+      }).loc(columns[column],rows[row], level10);
       elements.push(element);
     }
   }
-  let btn = new Button({
-    label:"animate"
-  }).loc(200,200,level11).tap(()=>{
-    let random = getRandom()
-    previous = random
-    console.log(random)
-    elements.forEach((element, i)=>{
-      element.animate({
-        props:{
-          x: animations[random].x[i],
-          y:animations[random].y[i],
-          shape: animations[random].shape[i],
-          color: animations[random].color[i]
-          // x: animations[4].x[i],
-          // y:animations[4].y[i],
-          // shape: animations[4].shape[i],
-          // color: animations[4].color[i],
-          // scale: animations[4].scale[i]
-        }
-      })
-    })
-  })
 
+  let btn = new Button({
+    label:"Start"
+  }).loc(100,200,level10).tap(()=>{
+    animate()
+  })
 }
+
+let proximityBtn =new Button({
+  label:"Proximity"
+}).loc(100,600,level10).tap(()=>{
+  animate()
+})
+let similarityBtn = new Button({
+  label:"Similarity"
+}).loc(100,400,level10).tap(()=>{
+  animate()
+})
+let continuityBtn = new Button({
+  label:"Continuity"
+}).loc(1100,600,level10).tap(()=>{
+  animate()
+})
+let commonFateBtn = new Button({
+  label:"Common fate"
+}).loc(1100,400,level10).tap(()=>{
+  animate()
+})
+let commonRegionBtn = new Button({
+  label:"Common region"
+}).loc(1100,200,level10).tap(()=>{
+  animate()
+})
+
+
 
 createLevel11Lattice();
 
@@ -1563,6 +1595,12 @@ createLevel11Lattice();
         case 8:
           pages.go(level9);
           break;
+        case 9:
+          pages.go(level10);
+          break;
+        case 10:
+          pages.go(level11);
+          break;  
       }
 
       level++;
