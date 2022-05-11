@@ -13,7 +13,7 @@ frame.on(
     // array to store the coordinates of the line drawn by the user
     let lineCords = [];
     //track the levels progress
-    let level = 1;
+    let level = 12;
     // initialize the var that contains the element id's of the elements selected by the user
     let selectedPoints;
 
@@ -511,10 +511,13 @@ frame.on(
     level9.title = new Label({text: "Level 9", color:white}).loc(100, 100, level9);
 
     let level10 = new Page(stageW, stageH, black).cur('grab');
-    level10.title = new Label({text: "Level 11", color:white}).loc(100, 100, level10);
+    level10.title = new Label({text: "Level 10", color:white}).loc(100, 100, level10);
 
     let level11 = new Page(stageW, stageH, black).cur('grab');
-    level11.title = new Label({text: "Level 10", color:white}).loc(100, 100, level11);
+    level11.title = new Label({text: "Level 11", color:white}).loc(100, 100, level11);
+
+    let level12 = new Page(stageW, stageH, black).cur('grab');
+    level12.title = new Label({text: "Level 12", color:white}).loc(100, 100, level12);
 
     level2.name = "level 2";
     level3.name = "level 3";
@@ -526,10 +529,11 @@ frame.on(
     level9.name = "level 9";
     level10.name = "level 10";
     level11.name = "level 11";
+    level11.name = "level 12";
 
     let pages = new Pages({
       pages: [
-        { page: level1 },
+        { page: level12 },
         { page: level2 },
         { page: level3 },
         { page: level4 },
@@ -540,6 +544,7 @@ frame.on(
         { page: level9 },
         { page: level10 },
         { page: level11 },
+        { page: level12 },
       ],
       transition: "slide",
       speed: 1,
@@ -1216,7 +1221,6 @@ frame.on(
        playMelody(circles);
      }
        );
-
  
        function playMelody(notes){
         let counter = 0
@@ -1561,6 +1565,90 @@ createLevel11Lattice();
  // There will also be a var that contains the currently presented principle in order to check the users submitted answer.
 
  // === END ANIMATION GAME === //
+
+ // === LEVEL 12 === //
+
+
+ let melody = [
+  {x: 100, y: 525},
+  {x: 200, y: 525},
+  {x: 300, y: 525},
+  {x: 400, y: 525},
+];
+
+
+ 
+// function playMelody(notes){
+//   let counter = 0
+//   //determine which sound it is based on the note's location on the y axis
+//    determineAudioSrc(notes[counter].y)
+//   //If the melody has more than one note
+//   if(notes.length > 1){
+//     //a recursive function to immitate a loop with setTimeout with a dynamic delay.
+//      function inner(){
+//           window.setTimeout(()=> {
+//             determineAudioSrc(notes[counter+1].y);
+//             counter++
+//             if(counter < notes.length-1){
+//               inner();
+//             }else playingCompleted = true;
+//             // the delay is determined by the distance on the x axis between two consequtive sounds
+//           } , (notes[counter+1].x - notes[counter].x) *10)
+//     }
+//       inner()
+//   }
+//   // if(playingCompleted){
+//   //   console.log("Completed")
+//   // }
+// }
+
+xPos = 300;
+let dotss = [];
+const createMelodyDots = ()=>{
+
+  for(let i=0; i<4; i++){
+    let dot = new Circle({
+      color: red,
+      radius:20
+    }).loc(xPos,500, level12)
+    xPos+=70
+    dotss.push(dot)
+  }
+  }
+  createMelodyDots()
+
+
+const animateMelody = (melody, dots)=>{
+  let counter = 0;
+  dots[counter].animate({
+    props:{scale:1.5},
+    rewind:true,
+    time: .1
+  })
+  function inner(){
+    window.setTimeout(()=>{
+      dots[counter+1].animate({
+          props:{scale:1.5},
+          rewind:true,
+          time: .1
+        })
+        counter++;
+        if(counter < melody.length-1){
+          inner();
+        }
+    }, (dots[counter+1].x - dots[counter].x)*14);
+  }
+  inner()
+}
+
+let button = new Button({
+  label: 'Play'
+}).loc(200,200, level12)
+.tap(()=>{
+  playMelody(melody)
+  animateMelody(melody, dotss)
+})
+
 
    //Move to the next level functionlity   
     nextLevelBtn.addEventListener("click", () => {
