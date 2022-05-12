@@ -1568,86 +1568,133 @@ createLevel11Lattice();
 
  // === LEVEL 12 === //
 
+ let currentNecklace = 1;
 
- let melody = [
-  {x: 100, y: 525},
-  {x: 200, y: 525},
-  {x: 300, y: 525},
-  {x: 400, y: 525},
-];
+let necklace = new Blob({
+  interactive: false,
+  borderColor: white,
+  borderWidth: 4,
+  radius: 250
+}).loc(700,400,level12)
 
+  //Prox in pitch
+  let melody1 = [
+    {x: 100, y: 525, dotX: 450, dotY:400},
+    {x: 200, y: 525, dotX: 700, dotY: 150},
+    {x: 300, y: 425, dotX: 950, dotY:400},
+    {x: 400, y: 425, dotX:700, dotY:650},
+  ];
 
- 
-// function playMelody(notes){
-//   let counter = 0
-//   //determine which sound it is based on the note's location on the y axis
-//    determineAudioSrc(notes[counter].y)
-//   //If the melody has more than one note
-//   if(notes.length > 1){
-//     //a recursive function to immitate a loop with setTimeout with a dynamic delay.
-//      function inner(){
-//           window.setTimeout(()=> {
-//             determineAudioSrc(notes[counter+1].y);
-//             counter++
-//             if(counter < notes.length-1){
-//               inner();
-//             }else playingCompleted = true;
-//             // the delay is determined by the distance on the x axis between two consequtive sounds
-//           } , (notes[counter+1].x - notes[counter].x) *10)
-//     }
-//       inner()
-//   }
-//   // if(playingCompleted){
-//   //   console.log("Completed")
-//   // }
-// }
+  //Prox in time
+  let melody2 = [
+    {x: 100, y: 525, dotX: 450, dotY:400},
+    {x: 150, y: 525, dotX: 700, dotY: 150},
+    {x: 350, y: 525, dotX: 950, dotY:400},
+    {x: 400, y: 525, dotX:700, dotY:650},
+  ];
 
-xPos = 300;
-let dotss = [];
-const createMelodyDots = ()=>{
+  let melody3=[
+    {x: 100, y: 450, dotX: 700, dotY:150},
+    {x: 200, y: 450, dotX: 870, dotY: 230},
+    {x: 250, y: 500, dotX: 950, dotY:400},
+    {x: 350, y: 500, dotX:870, dotY:570},
+    {x: 400, y: 475, dotX:700, dotY:650},
+    {x: 500, y: 475, dotX:530, dotY:570},
+    {x: 550, y: 525, dotX:450, dotY:400},
+    {x: 650, y: 525, dotX:530, dotY:230},
 
-  for(let i=0; i<4; i++){
+  ]
+
+xPos = [450,700,950, 700];
+yPos=[400, 150, 400, 650 ]
+let melodyDots = [];
+
+const createMelodyDots = (melody, color)=>{
+  for(let i=0; i<melody.length; i++){
     let dot = new Circle({
-      color: red,
+      color: color,
       radius:20
-    }).loc(xPos,500, level12)
-    xPos+=70
-    dotss.push(dot)
+    }).loc(melody[i].dotX,melody[i].dotY, level12)
+    melodyDots.push(dot)
   }
   }
-  createMelodyDots()
+  createMelodyDots(melody1, red)
 
-
-const animateMelody = (melody, dots)=>{
-  let counter = 0;
-  dots[counter].animate({
-    props:{scale:1.5},
-    rewind:true,
-    time: .1
-  })
-  function inner(){
-    window.setTimeout(()=>{
-      dots[counter+1].animate({
-          props:{scale:1.5},
-          rewind:true,
-          time: .1
-        })
-        counter++;
-        if(counter < melody.length-1){
-          inner();
-        }
-    }, (dots[counter+1].x - dots[counter].x)*14);
+  const animateMelody = (melody, dots)=>{
+    let counter = 0;
+    dots[counter].animate({
+      props:{scale:1.5},
+      rewind:true,
+      time: .1
+    })
+    function inner(){
+      window.setTimeout(()=>{
+        dots[counter+1].animate({
+            props:{scale:1.5},
+            rewind:true,
+            time: .1
+          })
+          counter++;
+          if(counter < melody.length-1){
+            inner();
+          }
+          // console.log(melody[counter+1].x - melody[counter].x)
+      }, (melody[counter+1].x - melody[counter].x)*10);
+    }
+    inner()
   }
-  inner()
-}
 
+  const removeDots = ()=>{
+    console.log(melodyDots)
+    for(let i=0; i<melodyDots.length; i++){
+      melodyDots[i].removeFrom()
+    }
+    melodyDots=[]
+    stage.update();
+  }
+
+  const nextNecklace = ()=>{
+    switch(currentNecklace){
+      case 2:
+        createMelodyDots(melody2, blue);
+        break;
+      case 3: 
+        createMelodyDots(melody3, yellow);
+        break;
+    }
+  }
+  
 let button = new Button({
   label: 'Play'
 }).loc(200,200, level12)
 .tap(()=>{
-  playMelody(melody)
-  animateMelody(melody, dotss)
+  switch(currentNecklace){
+    case 1:
+      playMelody(melody1)
+      animateMelody(melody1, melodyDots)
+      break;
+    case 2:
+      playMelody(melody2)
+      animateMelody(melody2,melodyDots)
+      break;
+    case 3:
+      playMelody(melody3)
+      animateMelody(melody3,melodyDots)    
+  }
+
 })
+
+let next = new Button({
+  label: 'Next'
+}).loc(200,600, level12)
+.tap(()=>{
+currentNecklace++
+removeDots()
+nextNecklace()
+stage.update();
+
+})
+
 
 
    //Move to the next level functionlity   
