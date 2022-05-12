@@ -16,6 +16,8 @@ frame.on(
     let level = 12;
     // initialize the var that contains the element id's of the elements selected by the user
     let selectedPoints;
+    //For level 12
+    let selectedGroups=[];
 
     // static possible answers.Will be replaced with a dynamic one in a database, once the backend will be developed. 
     let staticAnswers = [
@@ -566,7 +568,7 @@ frame.on(
     };
 
     stage.on("stagemousedown", () => {
-      if (level > 0 && level < 5) {
+      if (level > 0 && level < 5 || level == 12) {
         console.log("level is between range");
         shape = new Shape().addTo();
         shape.s(pink).ss(5);
@@ -587,7 +589,7 @@ frame.on(
 
       
     stage.on("stagemouseup", () => {
-      if (level > 0 && level < 5) {
+      if (level > 0 && level < 5 || level == 12) {
         Ticker.remove(ticker);
 
         clearInterval(getUpdatingPenCords);
@@ -607,7 +609,11 @@ frame.on(
                break;
            case 4:
             selectedPoints = getSelectedPoints(level4DotsCords, lineCords)
-            matchModalTextToLevel(level, selectedPoints)      
+            matchModalTextToLevel(level, selectedPoints)  
+           case 12:
+             selectedPoints= getSelectedPoints(melody1, lineCords)   
+             selectedGroups.push(selectedPoints);
+             console.log(selectedGroups);
             defualt: return;
         }
       }
@@ -1578,43 +1584,72 @@ let necklace = new Blob({
 }).loc(700,400,level12)
 
   //Prox in pitch
-  let melody1 = [
-    {x: 100, y: 525, dotX: 450, dotY:400},
-    {x: 200, y: 525, dotX: 700, dotY: 150},
-    {x: 300, y: 425, dotX: 950, dotY:400},
-    {x: 400, y: 425, dotX:700, dotY:650},
-  ];
+  let melody1 ={ 
+    sounds:[
+      {x: 100, y: 525,},
+      {x: 200, y: 525,},
+      {x: 300, y: 425,},
+      {x: 400, y: 425,},
+    ],
+    cords:[
+      { x: 450, y:400, id:1},
+      { x: 700, y: 150, id:2},
+      { x: 950, y:400, id:3},
+      { x:700, y:650, id:4},
+    ]
+  }
+  
 
   //Prox in time
-  let melody2 = [
-    {x: 100, y: 525, dotX: 450, dotY:400},
-    {x: 150, y: 525, dotX: 700, dotY: 150},
-    {x: 350, y: 525, dotX: 950, dotY:400},
-    {x: 400, y: 525, dotX:700, dotY:650},
-  ];
+  let melody2 ={ 
+    sounds:[
+      {x: 100, y: 525},
+      {x: 150, y: 525},
+      {x: 350, y: 525},
+      {x: 400, y: 525},
+    ],
+    cords:[
+      { x: 450, y:400},
+      { x: 700, y: 150},
+      { x: 950, y:400},
+      { x:700, y:650},
+    ]
+  }
 
-  let melody3=[
-    {x: 100, y: 450, dotX: 700, dotY:150},
-    {x: 200, y: 450, dotX: 870, dotY: 230},
-    {x: 250, y: 500, dotX: 950, dotY:400},
-    {x: 350, y: 500, dotX:870, dotY:570},
-    {x: 400, y: 475, dotX:700, dotY:650},
-    {x: 500, y: 475, dotX:530, dotY:570},
-    {x: 550, y: 525, dotX:450, dotY:400},
-    {x: 650, y: 525, dotX:530, dotY:230},
-
-  ]
+  let melody3 ={ 
+    sounds:[
+      {x: 100, y: 450},
+      {x: 200, y: 450},
+      {x: 250, y: 500},
+      {x: 350, y: 500},
+      {x: 400, y: 475},
+      {x: 500, y: 475},
+      {x: 550, y: 525},
+      {x: 650, y: 525},
+    ],
+    cords:[
+      {x: 700, y:150},
+      { x: 870, y: 230},
+      { x: 950, y:400},
+      {x:870, y:570},
+      { x:700, y:650},
+      { x:530, y:570},
+      {x:450, y:400},
+      {x:530, y:230},
+    ]
+  }
+ 
 
 xPos = [450,700,950, 700];
 yPos=[400, 150, 400, 650 ]
 let melodyDots = [];
 
 const createMelodyDots = (melody, color)=>{
-  for(let i=0; i<melody.length; i++){
+  for(let i=0; i<melody.sounds.length; i++){
     let dot = new Circle({
       color: color,
       radius:20
-    }).loc(melody[i].dotX,melody[i].dotY, level12)
+    }).loc(melody.cords[i].x,melody.cords[i].y, level12)
     melodyDots.push(dot)
   }
   }
@@ -1635,11 +1670,11 @@ const createMelodyDots = (melody, color)=>{
             time: .1
           })
           counter++;
-          if(counter < melody.length-1){
+          if(counter < melody.sounds.length-1){
             inner();
           }
           // console.log(melody[counter+1].x - melody[counter].x)
-      }, (melody[counter+1].x - melody[counter].x)*10);
+      }, (melody.sounds[counter+1].x - melody.sounds[counter].x)*10);
     }
     inner()
   }
@@ -1670,15 +1705,15 @@ let button = new Button({
 .tap(()=>{
   switch(currentNecklace){
     case 1:
-      playMelody(melody1)
+      playMelody(melody1.sounds)
       animateMelody(melody1, melodyDots)
       break;
     case 2:
-      playMelody(melody2)
+      playMelody(melody2.sounds)
       animateMelody(melody2,melodyDots)
       break;
     case 3:
-      playMelody(melody3)
+      playMelody(melody3.sounds)
       animateMelody(melody3,melodyDots)    
   }
 
@@ -1692,7 +1727,26 @@ currentNecklace++
 removeDots()
 nextNecklace()
 stage.update();
+})
 
+// let submit = new Button({
+//   label: 'Submit',
+//   id:90
+// }). loc(1000, 600, level12)
+// .tap(()=>{
+//   // shape.removeFrom(stage);
+//   // stage.update();
+// })
+
+document.addEventListener('keydown',(e)=>{
+  if(e.key==='Enter'){
+
+    for(let i=0; i<stage.children.length; i++){
+      stage.children.pop()
+      stage.update()
+    }
+
+  }
 })
 
 
