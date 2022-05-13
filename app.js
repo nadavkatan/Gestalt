@@ -13,7 +13,7 @@ frame.on(
     // array to store the coordinates of the line drawn by the user
     let lineCords = [];
     //track the levels progress
-    let level = 1;
+    let level = 12;
     // initialize the var that contains the element id's of the elements selected by the user
     let selectedPoints;
     //For level 12
@@ -536,7 +536,7 @@ frame.on(
 
     let pages = new Pages({
       pages: [
-        { page: level1 },
+        { page: level12 },
         { page: level2 },
         { page: level3 },
         { page: level4 },
