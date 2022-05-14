@@ -325,6 +325,35 @@ frame.on(
         },        
       ],
     },
+    {
+      level: 12,
+      necklace: 1,
+      numAnswersSubmitted: 10,
+      answers: [
+        {
+          answer: [[1,2], [3,4]],
+          timesChosen: 8,
+          percentage: 80,
+          answerClass: 'proximity3',
+          principle: 'Proximity in pitch'
+        },         
+      ],
+    },
+    {
+      level: 12,
+      necklace: 2,
+      numAnswersSubmitted: 10,
+      answers: [
+        {
+          answer: [[5,6], [7,8]],
+          timesChosen: 8,
+          percentage: 80,
+          answerClass: 'proximity4',
+          principle: 'Proximity in time'
+        },
+         
+      ],
+    },
     ];
   
     
@@ -612,9 +641,10 @@ frame.on(
             selectedPoints = getSelectedPoints(level4DotsCords, lineCords)
             matchModalTextToLevel(level, selectedPoints)  
            case 12:
-             selectedPoints= getSelectedPoints(melody1, lineCords)   
+             let currentMelody = getCurrentMelody()
+             selectedPoints= getSelectedPoints(currentMelody, lineCords)   
              selectedGroups.push(selectedPoints);
-             console.log(selectedGroups);
+             break;
             defualt: return;
         }
       }
@@ -1610,10 +1640,10 @@ let necklace = new Blob({
       {x: 400, y: 525},
     ],
     cords:[
-      { x: 450, y:400, id:1},
-      { x: 700, y: 150, id:2},
-      { x: 950, y:400, id:3},
-      { x:700, y:650, id:4},
+      { x: 450, y:400, id:5},
+      { x: 700, y: 150, id:6},
+      { x: 950, y:400, id:7},
+      { x:700, y:650, id:8},
     ]
   }
 
@@ -1680,6 +1710,15 @@ const createMelodyDots = (melody, color)=>{
     inner()
   }
 
+  const removeDrawings = ()=>{
+    if(stage.children.length > 1){
+      for(let i=0; i<stage.children.length; i++){
+        stage.children.pop()
+        stage.update()
+      }
+    }
+  }
+
   const removeDots = ()=>{
     console.log(melodyDots)
     for(let i=0; i<melodyDots.length; i++){
@@ -1729,31 +1768,43 @@ removeDots()
 nextNecklace()
 stage.update();
 selectedGroups = [];
+console.log(selectedGroups)
 })
 
-// let submit = new Button({
-//   label: 'Submit',
-//   id:90
-// }). loc(1000, 600, level12)
-// .tap(()=>{
-//   // shape.removeFrom(stage);
-//   // stage.update();
-// })
-let possibleAnswer = [[1,2], [3,4],];
+const sort2dArr=(arr)=>{
+  arr.sort(sortFunction);
+
+function sortFunction(a, b) {
+    if (a[0] === b[0]) {
+        return 0;
+    }
+    else {
+        return (a[0] < b[0]) ? -1 : 1;
+    }
+}
+  return arr
+}
+
+
 let checkAnswer = (answer, possibleAnswer)=>{
+  let sortedAnswer = sort2dArr(answer)
   x = true
-  if(answer.length !== possibleAnswer.length){
+  // check length of higher level array
+  if(sortedAnswer.length !== possibleAnswer.length){
     x = false
   }
-  for(let i = 0; i < answer.length; i++){
-    if(answer[i].length !== possibleAnswer[i].length){
+  //check lengths of inner arrays
+  for(let i = 0; i < sortedAnswer.length; i++){
+    if(sortedAnswer[i].length !== possibleAnswer[i].length){
       x= false
     }
   }
 
-  for(let i = 0; i < answer.length; i++){
-    for(let j = 0; j < answer[i].length; j++){
-      if(answer[i][j]!= possibleAnswer[i][j]){ 
+  // iterate through higher level array
+  for(let i = 0; i < sortedAnswer.length; i++){
+    //iterate through inner arrays and compare their elemets
+    for(let j = 0; j < sortedAnswer[i].length; j++){
+      if(sortedAnswer[i][j]!= possibleAnswer[i][j]){ 
         x= false
       }
     }
@@ -1761,33 +1812,57 @@ let checkAnswer = (answer, possibleAnswer)=>{
 return x
 }
 
-let organize2dArr=(arr)=>{
-  let x = arr.filter(arr=>{
-    if(arr[0] !== 1){
-      return arr
+const checkAllAnswers=()=>{
+  let relevactOptions = staticAnswers.find(answer => answer.necklace == currentNecklace);
+  let index;
+  for(let i = 0; i < relevactOptions.answers.length; i++){
+    console.log(relevactOptions.answers[i].answer)
+    console.log(selectedGroups)
+    if(checkAnswer(selectedGroups ,relevactOptions.answers[i].answer)){
+         index=i
     }
-  });
-
-  let y = arr.filter(arr=>{
-    if(arr[0] == 1){
-      return arr
-    }
-  });
-
-  let organized = [...y, ...x];
-  
+  }
+  return index
 }
+
+const getTextLevel12 = (index)=>{
+  let relevactOptions = staticAnswers.find(answer => answer.necklace == currentNecklace);
+  let principle, percentage;
+  if(index!==undefined){
+    principle = relevactOptions.answers[index].principle;
+    percentage = (relevactOptions.answers[index].timesChosen / relevactOptions.numAnswersSubmitted *100).toFixed(2);
+    relevactOptions.numAnswersSubmitted++; 
+    relevactOptions.answers[index].timesChosen ++
+    text = `${percentage}% of the users have reported to experience the same grouping intuition as you submitted. You goruping intuition confirms the Gestalt principle of ${principle}.`;
+  }else{
+    text= 'Your grouping intuition matches 0% of the previously submitted reports.';
+  }
+  return text
+}
+
+
 
 document.addEventListener('keydown',(e)=>{
   if(e.key==='Enter'){
-
-    for(let i=0; i<stage.children.length; i++){
-      stage.children.pop()
-      stage.update()
-    }
-
+    let index = checkAllAnswers()
+    modalTextContainer.textContent = getTextLevel12(index)
+    modalLevel1.style.display="block"
   }
 })
+
+const getCurrentMelody = () => {
+  switch(currentNecklace){
+    case 1:
+      return melody1
+      break;
+    case 2: 
+      return melody2
+      break;
+    case 3: 
+      return melody3
+      break;    
+  }
+}
 
 
 
@@ -1830,9 +1905,17 @@ document.addEventListener('keydown',(e)=>{
         case 10:
           pages.go(level11);
           break;  
+        case 12:
+          selectedGroups = []
+          removeDrawings()
+          removeDots()
+          currentNecklace++  
+          nextNecklace()
+          stage.update()
+        
       }
 
-      level++;
+      // level++;
       console.log("level: " + level);
     });
 
