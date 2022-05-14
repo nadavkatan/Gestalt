@@ -8,6 +8,7 @@ frame.on(
     const stage = frame.stage;
     let stageW = frame.width;
     let stageH = frame.height;
+    let drawingEnabled = false;
     // shape for the pen
     let shape;
     // array to store the coordinates of the line drawn by the user
@@ -354,6 +355,36 @@ frame.on(
          
       ],
     },
+    {
+      level: 12,
+      necklace: 3,
+      numAnswersSubmitted: 10,
+      answers: [
+        {
+          answer: [[1,2,3,4], [5,6,7,8]],
+          timesChosen: 5,
+          percentage: 50,
+          answerClass: undefined,
+          principle: 'Prarallelism'
+        },
+         
+      ],
+    },
+    {
+      level: 12,
+      necklace: 3,
+      numAnswersSubmitted: 10,
+      answers: [
+        {
+          answer: [[1,2,3], [4,5,6,7,8]],
+          timesChosen: 5,
+          percentage: 50,
+          answerClass: undefined,
+          principle: 'Proximity'
+        },
+         
+      ],
+    },
     ];
   
     
@@ -598,56 +629,81 @@ frame.on(
     };
 
     stage.on("stagemousedown", () => {
-      if (level > 0 && level < 5 || level == 12) {
-        console.log("level is between range");
-        shape = new Shape().addTo();
-        shape.s(pink).ss(5);
+      if (level > 0 && level < 5) {
+        // console.log("level is between range");
+        // shape = new Shape().addTo();
+        // shape.s(pink).ss(5);
 
-        lineCords = [];
-        dampX.immediate(frame.mouseX);
-        dampY.immediate(frame.mouseY);
-        shape.mt(frame.mouseX, frame.mouseY);
-        getUpdatingPenCords = setInterval(getCurrentPenCords, 50);
+        // lineCords = [];
+        // dampX.immediate(frame.mouseX);
+        // dampY.immediate(frame.mouseY);
+        // shape.mt(frame.mouseX, frame.mouseY);
+        // getUpdatingPenCords = setInterval(getCurrentPenCords, 50);
 
-        // instead of using mousemove event
-        ticker = Ticker.add(() => {
-          shape.lt(dampX.convert(frame.mouseX), dampY.convert(frame.mouseY));
-          stage.update();
-        });
+        // // instead of using mousemove event
+        // ticker = Ticker.add(() => {
+        //   shape.lt(dampX.convert(frame.mouseX), dampY.convert(frame.mouseY));
+        //   stage.update();
+        // });
+        draw()
+      }
+      if(level === 12 && drawingEnabled){
+        draw();
       }
     });
 
+    const draw = ()=>{
+      console.log("level is between range");
+      shape = new Shape().addTo();
+      shape.s(pink).ss(5);
+
+      lineCords = [];
+      dampX.immediate(frame.mouseX);
+      dampY.immediate(frame.mouseY);
+      shape.mt(frame.mouseX, frame.mouseY);
+      getUpdatingPenCords = setInterval(getCurrentPenCords, 50);
+
+      // instead of using mousemove event
+      ticker = Ticker.add(() => {
+        shape.lt(dampX.convert(frame.mouseX), dampY.convert(frame.mouseY));
+        stage.update();
+      });
+    }
+
       
     stage.on("stagemouseup", () => {
-      if (level > 0 && level < 5 || level == 12) {
-        Ticker.remove(ticker);
+      // if (level > 0 && level < 5 || level == 12) {
+        if(drawingEnabled){
+          Ticker.remove(ticker);
 
-        clearInterval(getUpdatingPenCords);
-
-        switch (level) {
-          case 1:
-          selectedPoints = getSelectedPoints(level1DotsCords, lineCords)
-        matchModalTextToLevel(level, selectedPoints)
-            break;
-          case 2:
-             selectedPoints = getSelectedPoints(level2DotsCords, lineCords)
-             matchModalTextToLevel(level, selectedPoints)
-            break;
-          case 3:
-            selectedPoints = getSelectedPoints(level3DotsCords, lineCords)
-            matchModalTextToLevel(level, selectedPoints)         
+          clearInterval(getUpdatingPenCords);
+  
+          switch (level) {
+            case 1:
+            selectedPoints = getSelectedPoints(level1DotsCords, lineCords)
+          matchModalTextToLevel(level, selectedPoints)
+              break;
+            case 2:
+               selectedPoints = getSelectedPoints(level2DotsCords, lineCords)
+               matchModalTextToLevel(level, selectedPoints)
+              break;
+            case 3:
+              selectedPoints = getSelectedPoints(level3DotsCords, lineCords)
+              matchModalTextToLevel(level, selectedPoints)         
+                 break;
+             case 4:
+              selectedPoints = getSelectedPoints(level4DotsCords, lineCords)
+              matchModalTextToLevel(level, selectedPoints)  
+             case 12:
+               let currentMelody = getCurrentMelody()
+               selectedPoints= getSelectedPoints(currentMelody, lineCords)   
+               selectedGroups.push(selectedPoints);
                break;
-           case 4:
-            selectedPoints = getSelectedPoints(level4DotsCords, lineCords)
-            matchModalTextToLevel(level, selectedPoints)  
-           case 12:
-             let currentMelody = getCurrentMelody()
-             selectedPoints= getSelectedPoints(currentMelody, lineCords)   
-             selectedGroups.push(selectedPoints);
-             break;
-            defualt: return;
+              defualt: return;
+          }
         }
-      }
+
+      // }
     });
 
     //algorithm that checks if a point is in a polygon based on the raycast algo.
@@ -1747,14 +1803,17 @@ let button = new Button({
     case 1:
       playMelody(melody1.sounds)
       animateMelody(melody1, melodyDots)
+      drawingEnabled = true
       break;
     case 2:
       playMelody(melody2.sounds)
       animateMelody(melody2,melodyDots)
+      drawingEnabled = true
       break;
     case 3:
       playMelody(melody3.sounds)
-      animateMelody(melody3,melodyDots)    
+      animateMelody(melody3,melodyDots) 
+      drawingEnabled = true   
   }
 
 })
@@ -1768,7 +1827,7 @@ removeDots()
 nextNecklace()
 stage.update();
 selectedGroups = [];
-console.log(selectedGroups)
+drawingEnabled = false
 })
 
 const sort2dArr=(arr)=>{
@@ -1844,6 +1903,7 @@ const getTextLevel12 = (index)=>{
 
 document.addEventListener('keydown',(e)=>{
   if(e.key==='Enter'){
+    drawingEnabled = false;
     let index = checkAllAnswers()
     modalTextContainer.textContent = getTextLevel12(index)
     modalLevel1.style.display="block"
