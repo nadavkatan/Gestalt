@@ -630,21 +630,6 @@ frame.on(
 
     stage.on("stagemousedown", () => {
       if (level > 0 && level < 5) {
-        // console.log("level is between range");
-        // shape = new Shape().addTo();
-        // shape.s(pink).ss(5);
-
-        // lineCords = [];
-        // dampX.immediate(frame.mouseX);
-        // dampY.immediate(frame.mouseY);
-        // shape.mt(frame.mouseX, frame.mouseY);
-        // getUpdatingPenCords = setInterval(getCurrentPenCords, 50);
-
-        // // instead of using mousemove event
-        // ticker = Ticker.add(() => {
-        //   shape.lt(dampX.convert(frame.mouseX), dampY.convert(frame.mouseY));
-        //   stage.update();
-        // });
         draw()
       }
       if(level === 12 && drawingEnabled){
@@ -672,8 +657,7 @@ frame.on(
 
       
     stage.on("stagemouseup", () => {
-      // if (level > 0 && level < 5 || level == 12) {
-        if(drawingEnabled){
+      if (level > 0 && level < 5 || drawingEnabled) {
           Ticker.remove(ticker);
 
           clearInterval(getUpdatingPenCords);
@@ -701,9 +685,8 @@ frame.on(
                break;
               defualt: return;
           }
-        }
 
-      // }
+      }
     });
 
     //algorithm that checks if a point is in a polygon based on the raycast algo.
@@ -1328,15 +1311,14 @@ frame.on(
                   counter++
                   if(counter < notes.length-1){
                     inner();
-                  }else playingCompleted = true;
+                  }else {
+                    drawingEnabled = true
+                  }
                   // the delay is determined by the distance on the x axis between two consequtive sounds
                 } , (notes[counter+1].x - notes[counter].x) *10)
           }
             inner()
         }
-        // if(playingCompleted){
-        //   console.log("Completed")
-        // }
       }
 
        const synth = new Tone.Synth().toDestination();
@@ -1803,17 +1785,14 @@ let button = new Button({
     case 1:
       playMelody(melody1.sounds)
       animateMelody(melody1, melodyDots)
-      drawingEnabled = true
       break;
     case 2:
       playMelody(melody2.sounds)
       animateMelody(melody2,melodyDots)
-      drawingEnabled = true
       break;
     case 3:
       playMelody(melody3.sounds)
       animateMelody(melody3,melodyDots) 
-      drawingEnabled = true   
   }
 
 })
@@ -1872,26 +1851,35 @@ return x
 }
 
 const checkAllAnswers=()=>{
-  let relevactOptions = staticAnswers.find(answer => answer.necklace == currentNecklace);
+  let relevantOptions = staticAnswers.filter(answer => answer.necklace == currentNecklace);
   let index;
-  for(let i = 0; i < relevactOptions.answers.length; i++){
-    console.log(relevactOptions.answers[i].answer)
+  let relevantOption;
+
+  for(let option = 0; option < relevantOptions.length; option++){
+  for(let i = 0; i < relevantOptions[option].answers.length; i++){  
+    console.log(relevantOptions[option].answers[i].answer)
     console.log(selectedGroups)
-    if(checkAnswer(selectedGroups ,relevactOptions.answers[i].answer)){
+    if(checkAnswer(selectedGroups ,relevantOptions[option].answers[i].answer)){
          index=i
+         relevantOption = option
     }
   }
-  return index
+  }
+  return {index: index, option: relevantOption}
 }
 
-const getTextLevel12 = (index)=>{
-  let relevactOptions = staticAnswers.find(answer => answer.necklace == currentNecklace);
+const getTextLevel12 = (index, option)=>{
+  let relevantOptions = staticAnswers.filter(answer => answer.necklace == currentNecklace);
   let principle, percentage;
-  if(index!==undefined){
-    principle = relevactOptions.answers[index].principle;
-    percentage = (relevactOptions.answers[index].timesChosen / relevactOptions.numAnswersSubmitted *100).toFixed(2);
-    relevactOptions.numAnswersSubmitted++; 
-    relevactOptions.answers[index].timesChosen ++
+  if(index!==undefined && option !== undefined){
+    principle = relevantOptions[option].answers[index].principle;
+    percentage = (relevantOptions[option].answers[index].timesChosen / relevantOptions[option].numAnswersSubmitted *100).toFixed(2);
+    
+    for(let i = 0; i < relevantOptions.length; i++){
+      relevantOptions[i].numAnswersSubmitted++; 
+    }
+
+    relevantOptions[option].answers[index].timesChosen ++
     text = `${percentage}% of the users have reported to experience the same grouping intuition as you submitted. You goruping intuition confirms the Gestalt principle of ${principle}.`;
   }else{
     text= 'Your grouping intuition matches 0% of the previously submitted reports.';
@@ -1904,8 +1892,8 @@ const getTextLevel12 = (index)=>{
 document.addEventListener('keydown',(e)=>{
   if(e.key==='Enter'){
     drawingEnabled = false;
-    let index = checkAllAnswers()
-    modalTextContainer.textContent = getTextLevel12(index)
+    const {index, option} = checkAllAnswers()
+    modalTextContainer.textContent = getTextLevel12(index, option)
     modalLevel1.style.display="block"
   }
 })
