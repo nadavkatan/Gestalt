@@ -385,9 +385,23 @@ frame.on(
          
       ],
     },
+    {
+      level: 12,
+      necklace: 4,
+      numAnswersSubmitted: 10,
+      answers: [
+        {
+          answer: [[1,2,3,4,5], [6,7,8]],
+          timesChosen: 5,
+          percentage: 50,
+          answerClass: undefined,
+          principle: 'Similarity in timbre'
+        },
+         
+      ],
+    },
     ];
-  
-    
+      
     const modalTexts = [
       {
         level: 1,
@@ -1301,13 +1315,13 @@ frame.on(
        function playMelody(notes){
         let counter = 0
         //determine which sound it is based on the note's location on the y axis
-         determineAudioSrc(notes[counter].y)
+         determineAudioSrc(notes[counter].y, notes[counter].synth)
         //If the melody has more than one note
         if(notes.length > 1){
           //a recursive function to immitate a loop with setTimeout with a dynamic delay.
            function inner(){
                 window.setTimeout(()=> {
-                  determineAudioSrc(notes[counter+1].y);
+                  determineAudioSrc(notes[counter+1].y, notes[counter+1].synth)
                   counter++
                   if(counter < notes.length-1){
                     inner();
@@ -1322,9 +1336,10 @@ frame.on(
       }
 
        const synth = new Tone.Synth().toDestination();
+       const amSynth = new Tone.AMSynth().toDestination();
 
 
-       function determineAudioSrc(y){
+       function determineAudioSrc(y, synth){
          if(y <= 531 && y >=520){
            console.log("note d");
            return synth.triggerAttackRelease("D4", "16n");
@@ -1655,10 +1670,10 @@ let necklace = new Blob({
   //Prox in pitch
   let melody1 ={ 
     sounds:[
-      {x: 100, y: 525,},
-      {x: 200, y: 525,},
-      {x: 300, y: 425,},
-      {x: 400, y: 425,},
+      {x: 100, y: 525, synth: synth},
+      {x: 200, y: 525, synth: synth},
+      {x: 300, y: 425, synth: synth},
+      {x: 400, y: 425, synth: synth},
     ],
     cords:[
       { x: 450, y:400, id:1},
@@ -1672,10 +1687,10 @@ let necklace = new Blob({
   //Prox in time
   let melody2 ={ 
     sounds:[
-      {x: 100, y: 525},
-      {x: 150, y: 525},
-      {x: 350, y: 525},
-      {x: 400, y: 525},
+      {x: 100, y: 525, synth: synth},
+      {x: 150, y: 525, synth: synth},
+      {x: 350, y: 525, synth: synth},
+      {x: 400, y: 525, synth: synth},
     ],
     cords:[
       { x: 450, y:400, id:5},
@@ -1687,14 +1702,37 @@ let necklace = new Blob({
 
   let melody3 ={ 
     sounds:[
-      {x: 100, y: 450},
-      {x: 200, y: 450},
-      {x: 250, y: 500},
-      {x: 350, y: 500},
-      {x: 400, y: 475},
-      {x: 500, y: 475},
-      {x: 550, y: 525},
-      {x: 650, y: 525},
+      {x: 100, y: 450,  synth: synth},
+      {x: 200, y: 450,  synth: synth},
+      {x: 250, y: 500,  synth: synth},
+      {x: 350, y: 500,  synth: synth},
+      {x: 400, y: 475,  synth: synth},
+      {x: 500, y: 475,  synth: synth},
+      {x: 550, y: 525,  synth: synth},
+      {x: 650, y: 525,  synth: synth},
+    ],
+    cords:[
+      {x: 700, y:150, id:1},
+      { x: 870, y: 230, id:2},
+      { x: 950, y:400, id:3},
+      {x:870, y:570, id:4},
+      { x:700, y:650, id:5},
+      { x:530, y:570, id:6},
+      {x:450, y:400, id:7},
+      {x:530, y:230, id:8},
+    ]
+  }
+
+  let melody4 ={ 
+    sounds:[
+      {x: 100, y: 525,  synth: synth},
+      {x: 175, y: 500,  synth: synth},
+      {x: 250, y: 475,  synth: synth},
+      {x: 325, y: 450,  synth: synth},
+      {x: 400, y: 425,  synth: synth},
+      {x: 475, y: 400,  synth: amSynth},
+      {x: 550, y: 375,  synth: amSynth},
+      {x: 625, y: 350,  synth: amSynth},
     ],
     cords:[
       {x: 700, y:150, id:1},
@@ -1774,6 +1812,9 @@ const createMelodyDots = (melody, color)=>{
       case 3: 
         createMelodyDots(melody3, yellow);
         break;
+      case 4:   
+        createMelodyDots(melody4, green);
+        break;
     }
   }
   
@@ -1783,8 +1824,9 @@ let button = new Button({
 .tap(()=>{
   switch(currentNecklace){
     case 1:
-      playMelody(melody1.sounds)
-      animateMelody(melody1, melodyDots)
+        playMelody(melody1.sounds)
+       animateMelody(melody1, melodyDots)
+
       break;
     case 2:
       playMelody(melody2.sounds)
@@ -1793,6 +1835,10 @@ let button = new Button({
     case 3:
       playMelody(melody3.sounds)
       animateMelody(melody3,melodyDots) 
+      break;
+    case 4:
+      playMelody(melody4.sounds)
+      animateMelody(melody4,melodyDots)   
   }
 
 })
@@ -1909,6 +1955,8 @@ const getCurrentMelody = () => {
     case 3: 
       return melody3
       break;    
+    case 4: 
+      return melody4  
   }
 }
 
