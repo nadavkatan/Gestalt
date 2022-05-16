@@ -10,6 +10,7 @@ frame.on(
     let stageH = frame.height;
     let drawingEnabled = false;
     let playingCompleted = true;
+    let drawings=[];
     // shape for the pen
     let shape;
     // array to store the coordinates of the line drawn by the user
@@ -416,6 +417,21 @@ frame.on(
          
       ],
     },
+    {
+      level: 12,
+      necklace: 6,
+      numAnswersSubmitted: 10,
+      answers: [
+        {
+          answer: [[1,2,3],[4,5,6],[7,8,9]],
+          timesChosen: 10,
+          percentage: 100,
+          answerClass: undefined,
+          principle: 'Symmetry'
+        },
+         
+      ],
+    },
     ];
       
     const modalTexts = [
@@ -691,7 +707,8 @@ frame.on(
           Ticker.remove(ticker);
 
           clearInterval(getUpdatingPenCords);
-  
+          drawings.push(shape)
+          console.log(drawings);
           switch (level) {
             case 1:
             selectedPoints = getSelectedPoints(level1DotsCords, lineCords)
@@ -1780,6 +1797,31 @@ const defaultVol = 0.7;
       { x:700, y:650, id:4},
     ]
   }
+
+  let melody6 ={ 
+    sounds:[
+      {x: 100, y: 500,  synth: synth, vol:defaultVol},
+      {x: 175, y: 400,  synth: synth, vol:defaultVol},
+      {x: 250, y: 400,  synth: synth, vol:defaultVol},
+      {x: 325, y: 500,  synth: synth, vol:defaultVol},
+      {x: 400, y: 400,  synth: synth, vol:defaultVol},
+      {x: 475, y: 400,  synth: synth, vol:defaultVol},
+      {x: 550, y: 500,  synth: synth, vol:defaultVol},
+      {x: 625, y: 400,  synth: synth, vol:defaultVol},
+      {x: 700, y: 400,  synth: synth, vol:defaultVol},
+    ],
+    cords:[
+      { x: 460, y:460, id:1},
+      { x: 470, y: 300, id:2},
+      { x: 580, y:185, id:3},
+      { x: 770, y:165, id:4},
+      { x: 900, y:270, id:5},
+      { x: 940, y: 450, id:6},
+      { x: 855, y:585, id:7},
+      { x:700, y:650, id:8},
+      { x:550, y:590, id:9},
+    ]
+  }
  
 
 xPos = [450,700,950, 700];
@@ -1822,12 +1864,19 @@ const createMelodyDots = (melody, color)=>{
   }
 
   const removeDrawings = ()=>{
-    if(stage.children.length > 1){
-      for(let i=0; i<stage.children.length; i++){
-        stage.children.pop()
-        stage.update()
-      }
+    // if(stage.children.length > 1){
+    //   for(let i=0; i<stage.children.length; i++){
+    //     stage.children.pop()
+    //     stage.update()
+    //   }
+    // }
+    console.log(drawings)
+    for(let i=0; i<drawings.length; i++){
+      drawings[i].removeFrom()
     }
+    drawings = [];
+    stage.update();
+
   }
 
   const removeDots = ()=>{
@@ -1852,6 +1901,9 @@ const createMelodyDots = (melody, color)=>{
         break;
       case 5: 
         createMelodyDots(melody5, red)  
+        break;
+      case 6: 
+        createMelodyDots(melody6, blue)
     }
   }
   
@@ -1877,9 +1929,15 @@ let playBtnLevel12 = new Button({
     case 4:
       playMelody(melody4.sounds)
       animateMelody(melody4,melodyDots)  
+      break;
     case 5:
       playMelody(melody5.sounds)
-      animateMelody(melody5,melodyDots)    
+      animateMelody(melody5,melodyDots) 
+      break;
+    case 6:
+      playMelody(melody6.sounds)
+      animateMelody(melody6,melodyDots)     
+      break;
   }
 }
 })
@@ -1999,7 +2057,9 @@ const getCurrentMelody = () => {
       return melody4  
       break;
     case 5: 
-      return melody5    
+      return melody5  
+    case 6: 
+    return melody6    
   }
 }
 
