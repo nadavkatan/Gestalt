@@ -412,7 +412,7 @@ frame.on(
           timesChosen: 10,
           percentage: 100,
           answerClass: undefined,
-          principle: 'Proximity in volume'
+          principle: 'Change (dynamics)'
         },
          
       ],
@@ -443,6 +443,21 @@ frame.on(
           percentage: 100,
           answerClass: undefined,
           principle: 'Change (register)'
+        },
+         
+      ],
+    },
+    {
+      level: 12,
+      necklace: 8,
+      numAnswersSubmitted: 10,
+      answers: [
+        {
+          answer: [[1,2],[3,4,5,6,7]],
+          timesChosen: 10,
+          percentage: 100,
+          answerClass: undefined,
+          principle: 'Change (length)'
         },
          
       ],
@@ -1859,6 +1874,28 @@ const defaultVol = 0.7;
       { x: 810, y:620, id:7},
     ]
   }
+  let melody8 ={ 
+    sounds:[
+      {x: 100, y: 475,  synth: synth, vol:defaultVol},
+      {x: 160, y: 450,  synth: synth, vol:defaultVol},
+      {x: 220, y: 425,  synth: synth, vol:defaultVol},
+      {x: 250, y: 450,  synth: synth, vol:defaultVol},
+      {x: 280, y: 425,  synth: synth, vol:defaultVol},
+      {x: 310, y: 400,  synth: synth, vol:defaultVol},
+      {x: 340, y: 375,  synth: synth, vol:defaultVol},
+
+    ],
+    cords:[
+      { x: 900, y:260, id:1},
+      { x: 940, y: 460, id:2},
+      { x: 810, y:620, id:3},
+      { x: 560, y:600, id:4},
+      { x: 455, y: 450, id:5},
+      { x: 510, y:250, id:6},
+      { x: 700, y:150, id:7},
+
+    ]
+  }
  
  
 
@@ -1946,6 +1983,8 @@ const createMelodyDots = (melody, color)=>{
        case 7: 
         createMelodyDots(melody7, yellow)
         break;
+       case 8:
+         createMelodyDots(melody8, green) 
     }
   }
   
@@ -1984,6 +2023,10 @@ let playBtnLevel12 = new Button({
       playMelody(melody7.sounds) 
       animateMelody(melody7,melodyDots)
       break; 
+    case 8:
+      playMelody(melody8.sounds)
+      animateMelody(melody8,melodyDots)
+      break;  
   }
 }
 })
@@ -2107,7 +2150,9 @@ const getCurrentMelody = () => {
     case 6: 
       return melody6 
     case 7: 
-     return melody7   
+     return melody7 
+     case 8: 
+     return melody8  
   }
 }
 
