@@ -432,6 +432,21 @@ frame.on(
          
       ],
     },
+    {
+      level: 12,
+      necklace: 7,
+      numAnswersSubmitted: 10,
+      answers: [
+        {
+          answer: [[1,2,3,4],[5,6,7]],
+          timesChosen: 10,
+          percentage: 100,
+          answerClass: undefined,
+          principle: 'Change (register)'
+        },
+         
+      ],
+    },
     ];
       
     const modalTexts = [
@@ -1822,6 +1837,29 @@ const defaultVol = 0.7;
       { x:550, y:590, id:9},
     ]
   }
+
+  let melody7 ={ 
+    sounds:[
+      {x: 100, y: 325,  synth: synth, vol:defaultVol},
+      {x: 130, y: 300,  synth: synth, vol:defaultVol},
+      {x: 160, y: 280,  synth: synth, vol:defaultVol},
+      {x: 190, y: 300,  synth: synth, vol:defaultVol},
+      {x: 220, y: 525,  synth: synth, vol:defaultVol},
+      {x: 250, y: 525,  synth: synth, vol:defaultVol},
+      {x: 280, y: 500,  synth: synth, vol:defaultVol},
+
+    ],
+    cords:[
+      { x: 560, y:600, id:1},
+      { x: 455, y: 450, id:2},
+      { x: 510, y:250, id:3},
+      { x: 700, y:150, id:4},
+      { x: 900, y:260, id:5},
+      { x: 940, y: 460, id:6},
+      { x: 810, y:620, id:7},
+    ]
+  }
+ 
  
 
 xPos = [450,700,950, 700];
@@ -1904,6 +1942,10 @@ const createMelodyDots = (melody, color)=>{
         break;
       case 6: 
         createMelodyDots(melody6, blue)
+        break;
+       case 7: 
+        createMelodyDots(melody7, yellow)
+        break;
     }
   }
   
@@ -1938,6 +1980,10 @@ let playBtnLevel12 = new Button({
       playMelody(melody6.sounds)
       animateMelody(melody6,melodyDots)     
       break;
+    case 7:
+      playMelody(melody7.sounds) 
+      animateMelody(melody7,melodyDots)
+      break; 
   }
 }
 })
@@ -2059,7 +2105,9 @@ const getCurrentMelody = () => {
     case 5: 
       return melody5  
     case 6: 
-    return melody6    
+      return melody6 
+    case 7: 
+     return melody7   
   }
 }
 
