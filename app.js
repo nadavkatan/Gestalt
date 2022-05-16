@@ -9,6 +9,7 @@ frame.on(
     let stageW = frame.width;
     let stageH = frame.height;
     let drawingEnabled = false;
+    let playingCompleted = true;
     // shape for the pen
     let shape;
     // array to store the coordinates of the line drawn by the user
@@ -396,6 +397,21 @@ frame.on(
           percentage: 50,
           answerClass: undefined,
           principle: 'Similarity in timbre'
+        },
+         
+      ],
+    },
+    {
+      level: 12,
+      necklace: 5,
+      numAnswersSubmitted: 10,
+      answers: [
+        {
+          answer: [[1,2],[3,4]],
+          timesChosen: 10,
+          percentage: 100,
+          answerClass: undefined,
+          principle: 'Proximity in volume'
         },
          
       ],
@@ -1314,19 +1330,21 @@ frame.on(
  
        function playMelody(notes){
         let counter = 0
+        playingCompleted = false;
         //determine which sound it is based on the note's location on the y axis
-         determineAudioSrc(notes[counter].y, notes[counter].synth)
+         determineAudioSrc(notes[counter].y, notes[counter].synth, notes[counter+1].vol)
         //If the melody has more than one note
         if(notes.length > 1){
           //a recursive function to immitate a loop with setTimeout with a dynamic delay.
            function inner(){
                 window.setTimeout(()=> {
-                  determineAudioSrc(notes[counter+1].y, notes[counter+1].synth)
+                  determineAudioSrc(notes[counter+1].y, notes[counter+1].synth, notes[counter+1].vol)
                   counter++
                   if(counter < notes.length-1){
                     inner();
                   }else {
-                    drawingEnabled = true
+                    // drawingEnabled = true
+                    playingCompleted = true
                   }
                   // the delay is determined by the distance on the x axis between two consequtive sounds
                 } , (notes[counter+1].x - notes[counter].x) *10)
@@ -1339,40 +1357,40 @@ frame.on(
        const amSynth = new Tone.AMSynth().toDestination();
 
 
-       function determineAudioSrc(y, synth){
+       function determineAudioSrc(y, synth, vol){
          if(y <= 531 && y >=520){
            console.log("note d");
-           return synth.triggerAttackRelease("D4", "16n");
+           return synth.triggerAttackRelease("D4", "16n", undefined, vol);
          }else if(y<= 521 && y >=495 ){
            console.log("note e");
-           return synth.triggerAttackRelease("E4", "16n");
+           return synth.triggerAttackRelease("E4", "16n", undefined, vol);
          }else if(y<=494 && y>=470){
            console.log("note f");
-           return synth.triggerAttackRelease("F4", "16n");
+           return synth.triggerAttackRelease("F4", "16n", undefined, vol);
          }else if(y<=469 && y>=448){
            console.log("note g");
-           return synth.triggerAttackRelease("G4", "16n");
+           return synth.triggerAttackRelease("G4", "16n", undefined, vol);
          }else if(y<=447 && y>=415){
            console.log("note a");
-           return synth.triggerAttackRelease("A4", "16n");
+           return synth.triggerAttackRelease("A4", "16n", undefined, vol);
          }else if(y<=414 && y>=397){
            console.log("note b");
-           return synth.triggerAttackRelease("B4", "16n");
+           return synth.triggerAttackRelease("B4", "16n", undefined, vol);
          }else if(y<=396 && y>=364){
            console.log("note c2");
-           return synth.triggerAttackRelease("C5", "16n");
+           return synth.triggerAttackRelease("C5", "16n", undefined, vol);
          }else if(y<=363 && y>=343){
            console.log("note d2");
-           return synth.triggerAttackRelease("D5", "16n");
+           return synth.triggerAttackRelease("D5", "16n", undefined, vol);
          }else if(y<=342 && y>=319){
            console.log("note e2");
-           return synth.triggerAttackRelease("E5", "16n");
+           return synth.triggerAttackRelease("E5", "16n", undefined, vol);
          }else if(y<=318 && y>= 295){
            console.log("note f2");
-           return synth.triggerAttackRelease("F5", "16n");
+           return synth.triggerAttackRelease("F5", "16n", undefined, vol);
          }else if(y<=294 && y>=272){
            console.log("note g2");
-           return synth.triggerAttackRelease("G5", "16n");
+           return synth.triggerAttackRelease("G5", "16n", undefined, vol);
          }
          
        }
@@ -1667,13 +1685,15 @@ let necklace = new Blob({
   radius: 250
 }).loc(700,400,level12)
 
+const defaultVol = 0.7;
+
   //Prox in pitch
   let melody1 ={ 
     sounds:[
-      {x: 100, y: 525, synth: synth},
-      {x: 200, y: 525, synth: synth},
-      {x: 300, y: 425, synth: synth},
-      {x: 400, y: 425, synth: synth},
+      {x: 100, y: 525, synth: synth, vol:defaultVol},
+      {x: 200, y: 525, synth: synth, vol:defaultVol},
+      {x: 300, y: 425, synth: synth, vol:defaultVol},
+      {x: 400, y: 425, synth: synth, vol:defaultVol},
     ],
     cords:[
       { x: 450, y:400, id:1},
@@ -1687,10 +1707,10 @@ let necklace = new Blob({
   //Prox in time
   let melody2 ={ 
     sounds:[
-      {x: 100, y: 525, synth: synth},
-      {x: 150, y: 525, synth: synth},
-      {x: 350, y: 525, synth: synth},
-      {x: 400, y: 525, synth: synth},
+      {x: 100, y: 525, synth: synth , vol:defaultVol},
+      {x: 150, y: 525, synth: synth , vol:defaultVol},
+      {x: 350, y: 525, synth: synth , vol:defaultVol},
+      {x: 400, y: 525, synth: synth , vol:defaultVol},
     ],
     cords:[
       { x: 450, y:400, id:5},
@@ -1702,14 +1722,14 @@ let necklace = new Blob({
 
   let melody3 ={ 
     sounds:[
-      {x: 100, y: 450,  synth: synth},
-      {x: 200, y: 450,  synth: synth},
-      {x: 250, y: 500,  synth: synth},
-      {x: 350, y: 500,  synth: synth},
-      {x: 400, y: 475,  synth: synth},
-      {x: 500, y: 475,  synth: synth},
-      {x: 550, y: 525,  synth: synth},
-      {x: 650, y: 525,  synth: synth},
+      {x: 100, y: 450,  synth: synth, vol:defaultVol},
+      {x: 200, y: 450,  synth: synth, vol:defaultVol},
+      {x: 250, y: 500,  synth: synth, vol:defaultVol},
+      {x: 350, y: 500,  synth: synth, vol:defaultVol},
+      {x: 400, y: 475,  synth: synth, vol:defaultVol},
+      {x: 500, y: 475,  synth: synth, vol:defaultVol},
+      {x: 550, y: 525,  synth: synth, vol:defaultVol},
+      {x: 650, y: 525,  synth: synth, vol:defaultVol},
     ],
     cords:[
       {x: 700, y:150, id:1},
@@ -1725,14 +1745,14 @@ let necklace = new Blob({
 
   let melody4 ={ 
     sounds:[
-      {x: 100, y: 525,  synth: synth},
-      {x: 175, y: 500,  synth: synth},
-      {x: 250, y: 475,  synth: synth},
-      {x: 325, y: 450,  synth: synth},
-      {x: 400, y: 425,  synth: synth},
-      {x: 475, y: 400,  synth: amSynth},
-      {x: 550, y: 375,  synth: amSynth},
-      {x: 625, y: 350,  synth: amSynth},
+      {x: 100, y: 525,  synth: synth, vol:defaultVol},
+      {x: 175, y: 500,  synth: synth, vol:defaultVol},
+      {x: 250, y: 475,  synth: synth, vol:defaultVol},
+      {x: 325, y: 450,  synth: synth, vol:defaultVol},
+      {x: 400, y: 425,  synth: synth, vol:defaultVol},
+      {x: 475, y: 400,  synth: amSynth, vol:defaultVol},
+      {x: 550, y: 375,  synth: amSynth, vol:defaultVol},
+      {x: 625, y: 350,  synth: amSynth, vol:defaultVol},
     ],
     cords:[
       {x: 700, y:150, id:1},
@@ -1743,6 +1763,21 @@ let necklace = new Blob({
       { x:530, y:570, id:6},
       {x:450, y:400, id:7},
       {x:530, y:230, id:8},
+    ]
+  }
+
+  let melody5 ={ 
+    sounds:[
+      {x: 100, y: 525, synth: synth, vol: defaultVol},
+      {x: 200, y: 525, synth: synth, vol: defaultVol},
+      {x: 300, y: 525, synth: synth, vol: 1.4},
+      {x: 400, y: 525, synth: synth, vol: 1.4},
+    ],
+    cords:[
+      { x: 450, y:400, id:1},
+      { x: 700, y: 150, id:2},
+      { x: 950, y:400, id:3},
+      { x:700, y:650, id:4},
     ]
   }
  
@@ -1815,13 +1850,16 @@ const createMelodyDots = (melody, color)=>{
       case 4:   
         createMelodyDots(melody4, green);
         break;
+      case 5: 
+        createMelodyDots(melody5, red)  
     }
   }
   
-let button = new Button({
+let playBtnLevel12 = new Button({
   label: 'Play'
 }).loc(200,200, level12)
 .tap(()=>{
+  if(playingCompleted){
   switch(currentNecklace){
     case 1:
         playMelody(melody1.sounds)
@@ -1838,21 +1876,23 @@ let button = new Button({
       break;
     case 4:
       playMelody(melody4.sounds)
-      animateMelody(melody4,melodyDots)   
+      animateMelody(melody4,melodyDots)  
+    case 5:
+      playMelody(melody5.sounds)
+      animateMelody(melody5,melodyDots)    
   }
-
+}
 })
 
-let next = new Button({
-  label: 'Next'
+let drawBtn = new Button({
+  label: 'Draw'
 }).loc(200,600, level12)
 .tap(()=>{
-currentNecklace++
-removeDots()
-nextNecklace()
-stage.update();
-selectedGroups = [];
-drawingEnabled = false
+if(playingCompleted){
+  drawBtn.backgroundColor === purple ? drawBtn.backgroundColor = orange : drawBtn.backgroundColor = purple
+  drawingEnabled = !drawingEnabled
+}
+console.log("Drawing: " + drawingEnabled)
 })
 
 const sort2dArr=(arr)=>{
@@ -1957,6 +1997,9 @@ const getCurrentMelody = () => {
       break;    
     case 4: 
       return melody4  
+      break;
+    case 5: 
+      return melody5    
   }
 }
 
@@ -2007,6 +2050,7 @@ const getCurrentMelody = () => {
           removeDots()
           currentNecklace++  
           nextNecklace()
+          drawBtn.backgroundColor = orange 
           stage.update()
         
       }
