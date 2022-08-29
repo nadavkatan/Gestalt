@@ -33,42 +33,77 @@ frame.on(
     // array to store the coordinates of the line drawn by the user
     let lineCords = [];
     //track the levels progress
-    let level = 1;
+    let level = 9;
     //Documents of levels collection from firebase
     let levelsDocuments = [];
     //Answers relevant for each level, fetched upon entering a level
     let relevantAnswers = [];
+    //Documents of the necklaces store in firebase
+    let necklacesDocuments = [];
+    //Answers relevant for level 12
+    let necklaceAnswers = [];
     // initialize the var that contains the element id's of the elements selected by the user
     let selectedPoints;
     //For level 12
     let selectedGroups = [];
 
-    let data = {
-      level: 9,
-      points: [
-        1084, 1086, 1088, 1090, 1092, 1094, 1096, 1098, 1100, 1102, 1104, 1106,
-        1108, 1110,
-      ],
-      timesChosen: 0,
-      answerClass: "hierarchy-continuity2",
-      principle: "Continuity",
-    };
+    //get dom elements
+    const modalLevel1 = document.querySelector(".modal-level-1");
+    const nextLevelBtn = document.querySelector(".next-level-btn");
+    const modalTextContainer = document.querySelector(".modal-body");
+    const modalFooter = document.querySelector(".modal-footer");
+    const cursor = document.querySelector(".cursor");
 
-    const storeData = async (data) => {
-      console.log("storing data");
-      let answers = collection(db, "answers");
-      await addDoc(answers, data);
-    };
-
-    // storeData(data);
-
-    // Firebase //
+    // === Firebase functionality === //
     (async function () {
       levelsDocuments = await getCollection("levels");
       console.log(levelsDocuments);
       relevantAnswers = await getDocumentsByQuery("answers", "level", level);
       console.log(relevantAnswers);
     })();
+
+    const getNecklaceAnswers = async (currentNecklace) => {
+      let storedNecklaceAnswers = await getDocumentsByQuery(
+        "level12Answers",
+        "necklace",
+        currentNecklace
+      );
+      console.log("stored answers: ", storedNecklaceAnswers);
+      necklaceAnswers = storedNecklaceAnswers.map((answer) => {
+        return {
+          ...answer,
+          points: formatArrayTo2d(answer.points),
+        };
+      });
+      console.log("formatted answers: ", necklaceAnswers);
+    };
+
+    const formatArrayTo2d = (arr) => {
+      let breakpointsIndexes = [];
+      let output = [];
+      for (let i = 0; i < arr.length; i++) {
+        if (arr[i] === "separator") {
+          breakpointsIndexes.push(i);
+        }
+      }
+      for (let j = breakpointsIndexes.length - 1; j >= 0; j--) {
+        output.push(arr.splice(breakpointsIndexes[j] + 1, arr.length));
+        arr.pop();
+      }
+      output.push(arr);
+      return output.reverse();
+    };
+
+    const formatArrayTo1d = (arr) => {
+      let output = [];
+      for (let i = 0; i < arr.length - 1; i++) {
+        output.push(...arr[i], "separator");
+      }
+      output.push(...arr[arr.length - 1]);
+
+      console.log(output);
+      return output;
+    };
 
     const updateLevelInfo = async () => {
       const relevantLevelDocument = levelsDocuments.find(
@@ -84,605 +119,16 @@ frame.on(
         level: level,
         points: points,
         timesChosen: 1,
+        answerClass: Math.floor(Math.random() * 1000000000).toString(),
       };
       await createDocument("answers", data);
     };
 
-    // static possible answers.Will be replaced with a dynamic one in a database, once the backend will be developed.
-    let staticAnswers = [
-      {
-        level: 1,
-        numAnswersSubmitted: 10,
-        answers: [
-          {
-            answer: [
-              112, 114, 116, 118, 120, 122, 124, 126, 128, 130, 132, 134, 136,
-              138, 140, 142, 144, 146, 148, 150, 152, 154, 156, 158,
-            ],
-            timesChosen: 10,
-            percentage: 100,
-            answerClass: "proximity",
-            principle: "Proximity",
-          },
-          {
-            answer: [
-              160, 162, 164, 166, 168, 170, 172, 174, 176, 178, 180, 182, 184,
-              186, 188, 190, 192, 194, 196, 198, 200, 202, 204, 206,
-            ],
-            timesChosen: 10,
-            percentage: 100,
-            answerClass: "proximity",
-            principle: "Proximity",
-          },
-          {
-            answer: [
-              112, 114, 116, 118, 120, 122, 124, 126, 128, 130, 132, 134, 136,
-              138, 140, 142, 144, 146, 148, 150, 152, 154, 156, 158, 160, 162,
-              164, 166, 168, 170, 172, 174, 176, 178, 180, 182, 184, 186, 188,
-              190, 192, 194, 196, 198, 200, 202, 204, 206,
-            ],
-            timesChosen: 0,
-            percentage: 0,
-            answerClass: undefined,
-            principle: undefined,
-          },
-        ],
-      },
-      {
-        level: 2,
-        numAnswersSubmitted: 10,
-        answers: [
-          {
-            answer: [
-              208, 210, 212, 214, 216, 218, 220, 222, 224, 226, 228, 230, 232,
-              234, 236, 238,
-            ],
-            timesChosen: 8,
-            percentage: 80,
-            answerClass: "similarity",
-            principle: "Similarity",
-          },
-          {
-            answer: [
-              240, 242, 244, 246, 248, 250, 252, 254, 256, 258, 260, 262, 264,
-              266, 268, 270,
-            ],
-            timesChosen: 8,
-            percentage: 80,
-            answerClass: "similarity",
-            principle: "Similarity",
-          },
-          {
-            answer: [
-              208, 210, 212, 214, 216, 218, 220, 222, 224, 226, 228, 230, 232,
-              234, 236, 238, 240, 242, 244, 246, 248, 250, 252, 254, 256, 258,
-              260, 262, 264, 266, 268, 270,
-            ],
-            timesChosen: 2,
-            percentage: 20,
-            answerClass: undefined,
-            principle: "Proximity",
-          },
-        ],
-      },
-      {
-        level: 3,
-        numAnswersSubmitted: 10,
-        answers: [
-          {
-            answer: [
-              304, 306, 308, 310, 312, 314, 316, 318, 320, 322, 324, 326, 328,
-              330, 332, 334,
-            ],
-            timesChosen: 8,
-            percentage: 80,
-            answerClass: "similarity",
-            principle: "Similarity",
-          },
-          {
-            answer: [
-              272, 274, 276, 278, 280, 282, 284, 286, 288, 290, 292, 294, 296,
-              298, 300, 302,
-            ],
-            timesChosen: 8,
-            percentage: 80,
-            answerClass: "similarity",
-            principle: "Similarity",
-          },
-          {
-            answer: [
-              272, 274, 276, 278, 280, 282, 284, 286, 288, 290, 292, 294, 296,
-              298, 300, 302, 304, 306, 308, 310, 312, 314, 316, 318, 320, 322,
-              324, 326, 328, 330, 332, 334,
-            ],
-            timesChosen: 2,
-            percentage: 20,
-            answerClass: undefined,
-            principle: "Proximity",
-          },
-        ],
-      },
-      {
-        level: 4,
-        numAnswersSubmitted: 10,
-        answers: [
-          {
-            answer: [336, 338, 340, 342, 344, 346, 348, 364],
-            timesChosen: 8,
-            percentage: 80,
-            answerClass: "continuity",
-            principle: "Continuity",
-          },
-          {
-            answer: [
-              350, 352, 354, 356, 358, 360, 362, 364, 366, 368, 370, 372, 374,
-              376, 378,
-            ],
-            timesChosen: 8,
-            percentage: 80,
-            answerClass: "similarity",
-            principle: "Similarity",
-          },
-          {
-            answer: [
-              336, 338, 340, 342, 344, 346, 348, 350, 352, 354, 356, 358, 360,
-              362, 364, 366, 368, 370, 372, 374, 376, 378,
-            ],
-            timesChosen: 1,
-            percentage: 10,
-            answerClass: undefined,
-            principle: "Proximity",
-          },
-          {
-            answer: [
-              336, 338, 340, 342, 344, 346, 348, 364, 366, 368, 370, 372, 374,
-              376, 378,
-            ],
-            timesChosen: 1,
-            percentage: 10,
-            answerClass: "lShape",
-            principle: "Continuity",
-          },
-          {
-            answer: [
-              336, 338, 340, 342, 344, 346, 348, 350, 352, 354, 356, 358, 360,
-              362, 364,
-            ],
-            timesChosen: 1,
-            percentage: 10,
-            answerClass: "lShape",
-            principle: "Continuity",
-          },
-        ],
-      },
-      {
-        level: 5,
-        numAnswersSubmitted: 10,
-        answers: [
-          {
-            answer: [386, 388, 390, 392, 394, 396],
-            timesChosen: 8,
-            percentage: 80,
-            answerClass: "continuity",
-            principle: "Continuity",
-          },
-          {
-            answer: [396, 398, 400, 402, 404, 406],
-            timesChosen: 8,
-            percentage: 80,
-            answerClass: "continuity",
-            principle: "Continuity",
-          },
-          {
-            answer: [406, 408, 410, 412, 414, 416],
-            timesChosen: 9,
-            percentage: 90,
-            answerClass: "continuity",
-            principle: "Continuity",
-          },
-          {
-            answer: [416, 418, 420, 422, 424, 426],
-            timesChosen: 9,
-            percentage: 90,
-            answerClass: "continuity",
-            principle: "Continuity",
-          },
-          {
-            answer: [426, 428, 430, 432, 434, 436],
-            timesChosen: 9,
-            percentage: 90,
-            answerClass: "continuity",
-            principle: "Continuity",
-          },
-          {
-            answer: [436, 438, 440, 442, 444, 446],
-            timesChosen: 9,
-            percentage: 90,
-            answerClass: "continuity",
-            principle: "Continuity",
-          },
-          {
-            answer: [
-              386, 388, 390, 392, 394, 396, 398, 400, 402, 404, 406, 408, 410,
-              412, 414, 416, 418, 420, 422, 424, 426, 428, 430, 432, 434, 436,
-              438, 440, 442, 444, 446,
-            ],
-            timesChosen: 1,
-            percentage: 10,
-            answerClass: "hierarchy-continuity",
-            principle: "Continuity",
-          },
-        ],
-      },
-      {
-        level: 6,
-        numAnswersSubmitted: 10,
-        answers: [
-          {
-            answer: [486, 488],
-            timesChosen: 10,
-            percentage: 100,
-            answerClass: "common-region",
-            principle: "Common region",
-          },
-          {
-            answer: [522, 524],
-            timesChosen: 10,
-            percentage: 100,
-            answerClass: "common-region",
-            principle: "Common region",
-          },
-          {
-            answer: [558, 560],
-            timesChosen: 10,
-            percentage: 100,
-            answerClass: "common-region",
-            principle: "Common region",
-          },
-          {
-            answer: [594, 596],
-            timesChosen: 10,
-            percentage: 100,
-            answerClass: "common-region",
-            principle: "Common region",
-          },
-        ],
-      },
-      {
-        level: 7,
-        numAnswersSubmitted: 10,
-        answers: [
-          {
-            answer: [614, 643],
-            timesChosen: 10,
-            percentage: 100,
-            answerClass: "parallelism",
-            principle: "Parallelism",
-          },
-          {
-            answer: [682, 721],
-            timesChosen: 10,
-            percentage: 100,
-            answerClass: "parallelism",
-            principle: "Parallelism",
-          },
-          {
-            answer: [760, 799],
-            timesChosen: 10,
-            percentage: 100,
-            answerClass: "parallelism",
-            principle: "Parallelism",
-          },
-        ],
-      },
-      {
-        level: 8,
-        numAnswersSubmitted: 10,
-        answers: [
-          {
-            answer: [842, 883],
-            timesChosen: 10,
-            percentage: 100,
-            answerClass: "symmetry",
-            principle: "Symmetry",
-          },
-          {
-            answer: [922, 961],
-            timesChosen: 10,
-            percentage: 100,
-            answerClass: "symmetry",
-            principle: "Symmetry",
-          },
-          {
-            answer: [1000, 1039],
-            timesChosen: 10,
-            percentage: 100,
-            answerClass: "symmetry",
-            principle: "Symmetry",
-          },
-        ],
-      },
-      {
-        level: 9,
-        numAnswersSubmitted: 10,
-        answers: [
-          {
-            answer: [1084, 1086, 1088, 1090, 1092, 1094, 1096],
-            timesChosen: 8,
-            percentage: 80,
-            answerClass: "similarity2",
-            principle: "Similarity",
-          },
-          {
-            answer: [1098, 1100, 1102, 1104, 1106, 1108, 1110],
-            timesChosen: 8,
-            percentage: 80,
-            answerClass: "similarity2",
-            principle: "Similarity",
-          },
-          {
-            answer: [
-              1084, 1086, 1088, 1090, 1092, 1094, 1096, 1098, 1100, 1102, 1104,
-              1106, 1108, 1110,
-            ],
-            timesChosen: 2,
-            percentage: 20,
-            answerClass: "hierarchy-continuity2",
-            principle: "Continuity",
-          },
-        ],
-      },
-      {
-        level: 12,
-        necklace: 1,
-        numAnswersSubmitted: 10,
-        answers: [
-          {
-            answer: [
-              [1, 2],
-              [3, 4],
-            ],
-            timesChosen: 8,
-            percentage: 80,
-            answerClass: "proximity3",
-            principle: "Proximity in pitch",
-          },
-        ],
-      },
-      {
-        level: 12,
-        necklace: 2,
-        numAnswersSubmitted: 10,
-        answers: [
-          {
-            answer: [
-              [5, 6],
-              [7, 8],
-            ],
-            timesChosen: 8,
-            percentage: 80,
-            answerClass: "proximity4",
-            principle: "Proximity in time",
-          },
-        ],
-      },
-      {
-        level: 12,
-        necklace: 3,
-        numAnswersSubmitted: 10,
-        answers: [
-          {
-            answer: [
-              [1, 2, 3, 4],
-              [5, 6, 7, 8],
-            ],
-            timesChosen: 5,
-            percentage: 50,
-            answerClass: undefined,
-            principle: "Prarallelism",
-          },
-        ],
-      },
-      {
-        level: 12,
-        necklace: 3,
-        numAnswersSubmitted: 10,
-        answers: [
-          {
-            answer: [
-              [1, 2, 3],
-              [4, 5, 6, 7, 8],
-            ],
-            timesChosen: 5,
-            percentage: 50,
-            answerClass: undefined,
-            principle: "Proximity",
-          },
-        ],
-      },
-      {
-        level: 12,
-        necklace: 4,
-        numAnswersSubmitted: 10,
-        answers: [
-          {
-            answer: [
-              [1, 2, 3, 4, 5],
-              [6, 7, 8],
-            ],
-            timesChosen: 5,
-            percentage: 50,
-            answerClass: undefined,
-            principle: "Similarity in timbre",
-          },
-        ],
-      },
-      {
-        level: 12,
-        necklace: 5,
-        numAnswersSubmitted: 10,
-        answers: [
-          {
-            answer: [
-              [1, 2],
-              [3, 4],
-            ],
-            timesChosen: 10,
-            percentage: 100,
-            answerClass: undefined,
-            principle: "Change (dynamics)",
-          },
-        ],
-      },
-      {
-        level: 12,
-        necklace: 6,
-        numAnswersSubmitted: 10,
-        answers: [
-          {
-            answer: [
-              [1, 2, 3],
-              [4, 5, 6],
-              [7, 8, 9],
-            ],
-            timesChosen: 10,
-            percentage: 100,
-            answerClass: undefined,
-            principle: "Symmetry",
-          },
-        ],
-      },
-      {
-        level: 12,
-        necklace: 7,
-        numAnswersSubmitted: 10,
-        answers: [
-          {
-            answer: [
-              [1, 2, 3, 4],
-              [5, 6, 7],
-            ],
-            timesChosen: 10,
-            percentage: 100,
-            answerClass: undefined,
-            principle: "Change (register)",
-          },
-        ],
-      },
-      {
-        level: 12,
-        necklace: 8,
-        numAnswersSubmitted: 10,
-        answers: [
-          {
-            answer: [
-              [1, 2],
-              [3, 4, 5, 6, 7],
-            ],
-            timesChosen: 10,
-            percentage: 100,
-            answerClass: undefined,
-            principle: "Change (length)",
-          },
-        ],
-      },
-    ];
+    // === firebase functionality END === //
 
-    const modalTexts = [
-      {
-        level: 1,
-        text: "Your intuitive choice here confirms the Gestalt principle of PROXIMITY. According to this principle, the human mind, on the one hand, groups elements that are located in high high proximity from one another, and on the other, form a 'boundary' between elements the are relatively far from one another.",
-      },
-      {
-        level: 2,
-        text: "Your intuitive choice here confirms the Gestalt principle of SIMILARITY. According to this principle, the human mind, on the one hand, groups elements that are similar to each other. Similarity, however, have various categories. In our case, the elements you perceived as belonging to the same group, are similar to each other in color. Additionally, a gorup boundary is formed at points of dissimalirity, as your intuition has confirmed.",
-      },
-      {
-        level: 3,
-        text: "Which Gestalt principle would you think your intuition has just confirmed?",
-        options: [
-          {
-            correct: true,
-            btnText: "Similarity in shape",
-          },
-          {
-            correct: false,
-            btnText: "Proximity",
-          },
-          {
-            correct: false,
-            btnText: "Similarity in color",
-          },
-          {
-            correct: false,
-            btnText: "Continuity",
-          },
-        ],
-      },
-      {
-        level: 4,
-        text: "Your intuitive choice here confirms the Gestalt principle of CONTINUITY. According to this principle, the human mind groups elements that seem to form a continuious line, and interprets a group-boundary once this line is interrupted.",
-      },
-      {
-        level: 5,
-        text: "Which Gestalt principle would you think your intuition has just confirmed?",
-        options: [
-          {
-            correct: false,
-            btnText: "Similarity in shape",
-          },
-          {
-            correct: false,
-            btnText: "Proximity",
-          },
-          {
-            correct: false,
-            btnText: "Similarity in color",
-          },
-          {
-            correct: true,
-            btnText: "Continuity",
-          },
-        ],
-      },
-      {
-        level: 6,
-        text: 'Your intuitive choice here confirms the Gestalt principle of COMMON REGION. According to this principle, the human mind groups elements that are located within the same region. In our case, the region is delineated by the red circles. Note, the principle of "common region" is in conflict with the principle of "proximity", and, in fact, overrides it. This means, that our intuition is a result of interactions between multiple Gestalt principles. In some cases, the involved principles reinforce one another, and in other, they contradict.',
-      },
-      {
-        level: 7,
-        text: "Your intuitive choice here confirms the Gestalt principle of PARALLELISM. According to this principle, the human mind groups elements that are parallel to each other.",
-      },
-      {
-        level: 8,
-        text: "What principle would you think supports your intuition?",
-        options: [
-          {
-            correct: false,
-            btnText: "Proximity",
-          },
-          {
-            correct: false,
-            btnText: "Parallelism",
-          },
-          {
-            correct: true,
-            btnText: "Symmetry",
-          },
-          {
-            correct: true,
-            btnText: "Continuity",
-          },
-        ],
-      },
-      {
-        level: 9,
-        text: "In this example you could see that Gestalt principles form multiple hierarchical levels. While that principle of similarity in color forms two the two lower level groups, which with the support of the principle of continuity, form another higher-level-group. The fact the this higher-level group has meaning for us (the letter 'G'), only reinforces our perception of it.",
-        question:
-          "In the next example we have nultiple groups. Select the one that contains the most elements.",
-      },
-    ];
+    // === Functionality of submitting, checking and responding to answers === //
 
+    // Function that checks whether two (sorted) arrays are identical
     const arrayEquals = (a, b) => {
       return (
         Array.isArray(a) &&
@@ -692,54 +138,84 @@ frame.on(
       );
     };
 
-    const getResponseText = (selectedPoints) => {
-      let relevantOptions = staticAnswers.find((obj) => obj.level == level);
-      let principle;
-      let percentage;
-      console.log(selectedPoints);
-      let index;
-      let text;
+    //Function that updates the answer and its common class answers in the db, or store a new answer if the user's
+    // submission does not already exists in the db
+    const updateAnswersInfo = async (index, selectedPoints) => {
+      if (index !== undefined) {
+        let commonClassAnswers = relevantAnswers.filter(
+          (answer) => answer.answerClass === relevantAnswers[index].answerClass
+        );
+        for (let i = 0; i < commonClassAnswers.length; i++) {
+          await updateDocument("answers", commonClassAnswers[i].id, {
+            timesChosen: relevantAnswers[index].timesChosen + 1,
+          });
+        }
+      } else {
+        console.log("storing a new answer");
+        storeNewAnswer(selectedPoints);
+      }
+    };
+
+    // Function that compares the points selected by the user with the existing answers fetched on mount from the db
+    const compSelectionWithAnswers = (selectedPoints) => {
+      for (let i = 0; i < relevantAnswers.length; i++) {
+        if (arrayEquals(relevantAnswers[i].points, selectedPoints)) {
+          console.log("answer exists: ", relevantAnswers[i]);
+          return i;
+        }
+      }
+      return undefined;
+    };
+
+    // Function that return the aproriate text to be displayed according to the user's submission,
+    // and the index of the answer in the existing answers that corresponds to the user's selection
+    const getResponseText = async (selectedPoints) => {
+      let principle, percentage, index, text;
+
+      // Check that a selection has been made
       if (!selectedPoints.length) {
         text = "You have not selected any point. Try again";
         return text;
       }
-
-      for (let i = 0; i < relevantOptions.answers.length; i++) {
-        if (arrayEquals(relevantOptions.answers[i].answer, selectedPoints)) {
-          index = i;
-        }
-      }
+      index = compSelectionWithAnswers(selectedPoints);
 
       if (index !== undefined) {
-        principle = relevantOptions.answers[index].principle;
+        principle = relevantAnswers[index].principle;
+        const levelDocument = levelsDocuments.find(
+          (doc) => doc.level === level
+        );
         percentage = (
-          (relevantOptions.answers[index].timesChosen /
-            relevantOptions.numAnswersSubmitted) *
+          (Number(relevantAnswers[index].timesChosen) /
+            Number(levelDocument.numAnswersSubmitted)) *
           100
         ).toFixed(2);
+        console.log("timesChosen: ", relevantAnswers[index].timesChosen);
+        console.log(
+          "numAnsweredSubmitted: ",
+          levelDocument.numAnswersSubmitted
+        );
+        console.log(
+          relevantAnswers[index].timesChosen / levelDocument.numAnswersSubmitted
+        );
 
-        relevantOptions.numAnswersSubmitted++;
-        relevantOptions.answers[index].timesChosen++;
         text = `${percentage}% of the users have reported to experience the same grouping intuition as you submitted. You goruping intuition confirms the Gestalt principle of ${principle}.`;
       } else {
         text =
           "Your grouping intuition matches 0% of the previously submitted reports.";
       }
-      return text;
+      return { text, index };
     };
 
-    //get dom elements
-    const modalLevel1 = document.querySelector(".modal-level-1");
-    const nextLevelBtn = document.querySelector(".next-level-btn");
-    const modalTextContainer = document.querySelector(".modal-body");
-    const modalFooter = document.querySelector(".modal-footer");
-    const cursor = document.querySelector(".cursor");
-
     // When the user answers correctly, he gets explanations about his/her intuition. This function matches the explanations to the current level.
-    function matchModalTextToLevel(level, selectedPoints) {
-      modalTextContainer.textContent = getResponseText(selectedPoints);
+    const submitAnswer = async (level, selectedPoints) => {
+      const { text, index } = await getResponseText(selectedPoints);
+      modalTextContainer.textContent = text;
       modalLevel1.style.display = "block";
-    }
+      await updateLevelInfo();
+      await updateAnswersInfo(index, selectedPoints);
+    };
+
+    // === END answer submission functionality === //
 
     // customizing the cursor
     document.addEventListener("mousemove", (e) => {
@@ -763,21 +239,6 @@ frame.on(
       100,
       level1
     );
-
-    new Button({
-      label: "Press",
-    })
-      .loc(200, 200, level1)
-      .tap(async () => {
-        // storeData(data);
-        const relevantLevelDocument = levelsDocuments.find(
-          (doc) => doc.level === level
-        );
-        console.log("relevant level: ", relevantLevelDocument);
-        await updateDocument("levels", relevantLevelDocument.id, {
-          numAnswersSubmitted: relevantLevelDocument.numAnswersSubmitted + 1,
-        });
-      });
 
     let level2 = new Page(stageW, stageH, black).cur("none");
     level2.title = new Label({ text: "Level 2", color: white }).loc(
@@ -870,7 +331,7 @@ frame.on(
 
     let pages = new Pages({
       pages: [
-        { page: level1 },
+        { page: level9 },
         { page: level2 },
         { page: level3 },
         { page: level4 },
@@ -887,7 +348,9 @@ frame.on(
       speed: 1,
     }).addTo();
 
-    //set up the dynamic drawing functionality
+    // === Create levels pages END === //
+
+    // === set up the dynamic drawing functionality === //
     let ticker;
     const dampX = new Damp(null, 0.1);
     const dampY = new Damp(null, 0.1);
@@ -898,7 +361,7 @@ frame.on(
         x: frame.mouseX.toFixed(),
         y: frame.mouseY.toFixed(),
       });
-      console.log(lineCords);
+      // console.log(lineCords);
     };
 
     stage.on("stagemousedown", () => {
@@ -911,7 +374,7 @@ frame.on(
     });
 
     const draw = () => {
-      console.log("level is between range");
+      // console.log("level is between range");
       shape = new Shape().addTo();
       shape.s(pink).ss(5);
 
@@ -928,29 +391,29 @@ frame.on(
       });
     };
 
-    stage.on("stagemouseup", () => {
+    stage.on("stagemouseup", async () => {
       if ((level > 0 && level < 5) || drawingEnabled) {
         Ticker.remove(ticker);
 
         clearInterval(getUpdatingPenCords);
         drawings.push(shape);
-        console.log(drawings);
+        // console.log(drawings);
         switch (level) {
           case 1:
             selectedPoints = getSelectedPoints(level1DotsCords, lineCords);
-            matchModalTextToLevel(level, selectedPoints);
+            await submitAnswer(level, selectedPoints);
             break;
           case 2:
             selectedPoints = getSelectedPoints(level2DotsCords, lineCords);
-            matchModalTextToLevel(level, selectedPoints);
+            await submitAnswer(level, selectedPoints);
             break;
           case 3:
             selectedPoints = getSelectedPoints(level3DotsCords, lineCords);
-            matchModalTextToLevel(level, selectedPoints);
+            await submitAnswer(level, selectedPoints);
             break;
           case 4:
             selectedPoints = getSelectedPoints(level4DotsCords, lineCords);
-            matchModalTextToLevel(level, selectedPoints);
+            await submitAnswer(level, selectedPoints);
           case 12:
             let currentMelody = getCurrentMelody();
             selectedPoints = getSelectedPoints(currentMelody, lineCords);
@@ -994,7 +457,8 @@ frame.on(
       return uniques;
     };
 
-    // The line cords are initially recieved as an array with objects. This function removes the objects and sets each point in an array. All the points are then stored in a
+    // The line cords are initially recieved as an array with objects.
+    // This function removes the objects and sets each point in an array. All the points are then stored in a
     // higher level array, returning a two-dimensional array of the line cords.
     const convertToArr = (lineCords) => {
       let arr = [];
@@ -1016,7 +480,7 @@ frame.on(
           cordsWithoutDuplicates
         );
         if (pointInCircle) {
-          console.log("point inside");
+          // console.log("point inside");
           selectedPoints.push(latticeDots.cords[i].id);
         }
       }
@@ -1094,7 +558,7 @@ frame.on(
         y2: initialValueY + rows * step - 30,
       });
 
-      console.log(levelDotsCords);
+      // console.log(levelDotsCords);
     }
 
     // === LEVEL 1 PROXIMITY === //
@@ -1286,11 +750,12 @@ frame.on(
       label: "SUBMIT",
     })
       .loc(400, 650, level5)
-      .tap(() => {
+      .tap(async () => {
         let sorted = userSelectedbtns.sort((a, b) => {
           return a - b;
         });
-        matchModalTextToLevel(level, sorted);
+        console.log(sorted);
+        await submitAnswer(level, sorted);
       });
 
     // === LEVEL 6 COMMON REGION === //
@@ -1339,11 +804,11 @@ frame.on(
         label: "SUBMIT",
       })
         .loc(400, 600, level6)
-        .tap(function () {
+        .tap(async () => {
           let sorted = level6SelectedDots.sort((a, b) => {
             return a - b;
           });
-          matchModalTextToLevel(level, sorted);
+          await submitAnswer(level, sorted);
         });
     }
     createLevel6Lattice();
@@ -1429,11 +894,11 @@ frame.on(
       label: "SUBMIT",
     })
       .loc(400, 600, level7)
-      .tap(() => {
+      .tap(async () => {
         let sorted = selectedSquiggles.sort((a, b) => {
           return a - b;
         });
-        matchModalTextToLevel(level, sorted);
+        await submitAnswer(level, sorted);
       });
 
     // === LEVEL 8 === SYMMETRY === //
@@ -1493,11 +958,11 @@ frame.on(
       label: "SUBMIT",
     })
       .loc(430, 600, level8)
-      .tap(() => {
+      .tap(async () => {
         let sorted = selectedSquiggles.sort((a, b) => {
           return a - b;
         });
-        matchModalTextToLevel(level, sorted);
+        await submitAnswer(level, sorted);
       });
 
     // === LEVEL 9 HIERARCHY - CONTINUITY & SIMILARITY === //
@@ -1576,11 +1041,11 @@ frame.on(
       label: "SUBMIT",
     })
       .loc(400, 670, level9)
-      .tap(() => {
+      .tap(async () => {
         let sorted = selectedRects.sort((a, b) => {
           return a - b;
         });
-        matchModalTextToLevel(level, sorted);
+        await submitAnswer(level, sorted);
       });
 
     // === LEVEL 11 COMPOSE === //
@@ -2779,7 +2244,7 @@ frame.on(
 
     let checkAnswer = (answer, possibleAnswer) => {
       let sortedAnswer = sort2dArr(answer);
-      x = true;
+      let x = true;
       // check length of higher level array
       if (sortedAnswer.length !== possibleAnswer.length) {
         x = false;
@@ -2804,48 +2269,43 @@ frame.on(
     };
 
     const checkAllAnswers = () => {
-      let relevantOptions = staticAnswers.filter(
-        (answer) => answer.necklace == currentNecklace
-      );
       let index;
       let relevantOption;
-
-      for (let option = 0; option < relevantOptions.length; option++) {
-        for (let i = 0; i < relevantOptions[option].answers.length; i++) {
-          console.log(relevantOptions[option].answers[i].answer);
-          console.log(selectedGroups);
-          if (
-            checkAnswer(
-              selectedGroups,
-              relevantOptions[option].answers[i].answer
-            )
-          ) {
-            index = i;
-            relevantOption = option;
-          }
+      for (let option = 0; option < necklaceAnswers.length; option++) {
+        console.log(necklaceAnswers[option].points);
+        console.log(selectedGroups);
+        if (checkAnswer(selectedGroups, necklaceAnswers[option].points)) {
+          index = option;
+          relevantOption = necklaceAnswers[option];
+          console.log("relevant option: ", relevantOption);
         }
       }
       return { index: index, option: relevantOption };
     };
 
-    const getTextLevel12 = (index, option) => {
-      let relevantOptions = staticAnswers.filter(
-        (answer) => answer.necklace == currentNecklace
-      );
-      let principle, percentage;
+    const getTextLevel12 = async (index, option) => {
+      let principle, percentage, text;
       if (index !== undefined && option !== undefined) {
-        principle = relevantOptions[option].answers[index].principle;
+        principle = option.principle;
         percentage = (
-          (relevantOptions[option].answers[index].timesChosen /
-            relevantOptions[option].numAnswersSubmitted) *
+          (option.timesChosen /
+            necklacesDocuments[currentNecklace - 1].numAnswersSubmitted) *
           100
         ).toFixed(2);
 
-        for (let i = 0; i < relevantOptions.length; i++) {
-          relevantOptions[i].numAnswersSubmitted++;
-        }
+        //update database
+        await updateDocument(
+          "necklaces",
+          necklacesDocuments[currentNecklace - 1].id,
+          {
+            numAnswersSubmitted:
+              necklacesDocuments[currentNecklace - 1].numAnswersSubmitted + 1,
+          }
+        );
+        await updateDocument("level12Answers", option.id, {
+          timesChosen: option.timesChosen + 1,
+        });
 
-        relevantOptions[option].answers[index].timesChosen++;
         text = `${percentage}% of the users have reported to experience the same grouping intuition as you submitted. You goruping intuition confirms the Gestalt principle of ${principle}.`;
       } else {
         text =
@@ -2854,11 +2314,11 @@ frame.on(
       return text;
     };
 
-    document.addEventListener("keydown", (e) => {
+    document.addEventListener("keydown", async (e) => {
       if (e.key === "Enter") {
         drawingEnabled = false;
         const { index, option } = checkAllAnswers();
-        modalTextContainer.textContent = getTextLevel12(index, option);
+        modalTextContainer.textContent = await getTextLevel12(index, option);
         modalLevel1.style.display = "block";
       }
     });
@@ -2888,83 +2348,73 @@ frame.on(
       }
     };
 
+    const goToNextLevel = async (nextLevel) => {
+      pages.go(nextLevel);
+      if (level < 5) {
+        shape.removeFrom(stage);
+        stage.update();
+      }
+      level++;
+      relevantAnswers = await getDocumentsByQuery("answers", "level", level);
+      console.log(relevantAnswers);
+    };
+
     //Move to the next level functionlity
     nextLevelBtn.addEventListener("click", async () => {
       modalLevel1.style.display = "none";
       switch (level) {
         case 1:
-          pages.go(level2);
-          shape.removeFrom(stage);
-          stage.update();
-          level++;
-          relevantAnswers = await getDocumentsByQuery(
-            "answers",
-            "level",
-            level
-          );
-          console.log(relevantAnswers);
+          await goToNextLevel(level2);
           break;
         case 2:
-          pages.go(level3);
-          shape.removeFrom(stage);
-          stage.update();
-          level++;
+          await goToNextLevel(level3);
           break;
         case 3:
-          pages.go(level4);
-          shape.removeFrom(stage);
-          stage.update();
-          level++;
+          await goToNextLevel(level4);
           break;
         case 4:
-          pages.go(level5);
-          shape.removeFrom(stage);
-          stage.update();
-          level++;
+          await goToNextLevel(level5);
           break;
         case 5:
-          pages.go(level6);
-          level++;
-          break;
+          await goToNextLevel(level6);
           break;
         case 6:
-          pages.go(level7);
-          level++;
-          break;
+          await goToNextLevel(level7);
           break;
         case 7:
           selectedSquiggles = [];
-          pages.go(level8);
-          level++;
-          break;
+          await goToNextLevel(level8);
           break;
         case 8:
-          pages.go(level9);
-          level++;
-          break;
+          await goToNextLevel(level9);
           break;
         case 9:
-          pages.go(level10);
-          level++;
-          break;
+          // pages.go(level10);
+          // level++;
+          pages.go(level12);
+          level = 12;
+          // if (level < 5) {
+          //   shape.removeFrom(stage);
+          //   stage.update();
+          // }
+          necklacesDocuments = await getCollection("necklaces");
+          console.log(necklacesDocuments);
+          await getNecklaceAnswers(1);
           break;
         case 10:
           pages.go(level11);
           level++;
-          break;
           break;
         case 12:
           selectedGroups = [];
           removeDrawings();
           removeDots();
           currentNecklace++;
+          await getNecklaceAnswers(currentNecklace);
           nextNecklace();
           drawBtn.backgroundColor = orange;
           stage.update();
       }
-
-      // level++;
-      console.log("level: " + level);
     });
 
     stage.update();
