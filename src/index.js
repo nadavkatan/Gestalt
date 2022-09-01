@@ -15,10 +15,12 @@ import {
   getDocumentsByQuery,
   createDocument,
 } from "./utils/firestore";
+
+// import video2 from './assets/videosgestalt_intro.mp4'
 // === PART I === FUNDAMENTAL GESTALT PRINCIPLES === //
 
 //Set the canvas using ZIM.js
-const frame = new Frame(FIT, 1424, 768);
+const frame = new Frame(FIT, 1024, 768, light, dark);
 frame.on(
   "ready",
   () => {
@@ -33,7 +35,7 @@ frame.on(
     // array to store the coordinates of the line drawn by the user
     let lineCords = [];
     //track the levels progress
-    let level = 9;
+    let level = 1;
     //Documents of levels collection from firebase
     let levelsDocuments = [];
     //Answers relevant for each level, fetched upon entering a level
@@ -46,6 +48,10 @@ frame.on(
     let selectedPoints;
     //For level 12
     let selectedGroups = [];
+    //Store a number representing the last level for which the user have sumbitted answers
+    let submittedForLevel = 0;
+    // Store boolean representing whether the user have already submitted answers
+    let submitted = submittedForLevel < level;
 
     //get dom elements
     const modalLevel1 = document.querySelector(".modal-level-1");
@@ -53,13 +59,56 @@ frame.on(
     const modalTextContainer = document.querySelector(".modal-body");
     const modalFooter = document.querySelector(".modal-footer");
     const cursor = document.querySelector(".cursor");
+    const zimCanvas = document.querySelector("#myCanvas");
+    const level0 = document.querySelector("#level0");
+    const startBtn = document.querySelector(".startApp");
 
     // === Firebase functionality === //
-    (async function () {
+
+    const initializeGame = async () => {
       levelsDocuments = await getCollection("levels");
       console.log(levelsDocuments);
       relevantAnswers = await getDocumentsByQuery("answers", "level", level);
       console.log(relevantAnswers);
+    };
+
+    const initializeLocalStorage = () => {
+      let storedProgress = JSON.parse(localStorage.getItem("gestaltGame"));
+      console.log(storedProgress);
+      if (!storedProgress) {
+        localStorage.setItem(
+          "gestaltGame",
+          JSON.stringify({ answersSubmittedForLevels: 0 })
+        );
+      } else {
+        submittedForLevel = storedProgress.answersSubmittedForLevels;
+      }
+    };
+
+    startBtn.addEventListener("click", async () => {
+      level = 1;
+      await initializeGame();
+      initializeLocalStorage();
+      zimCanvas.style.display = "block";
+      level0.style.display = "none";
+    });
+
+    (async function () {
+      zimCanvas.style.display = "none";
+      // await initializeGame();
+      // initializeLocalStorage();
+
+      // let data = [
+      //   264, 266, 268, 270, 272, 274, 276, 278, 280, 282, 284, 286, 288, 290,
+      //   292, 294,
+      // ];
+
+      // let data = [1092, 1094, 1096, 1098, 1100, 1102, 1104];
+      // let data = [
+      //   1078, 1080, 1082, 1084, 1086, 1088, 1090, 1092, 1094, 1096, 1098, 1100,
+      //   1102, 1104,
+      // ];
+      // await updateDocument("answers", "GgvZL1Dfnt3kPNTcFq0P", { points: data });
     })();
 
     const getNecklaceAnswers = async (currentNecklace) => {
@@ -171,14 +220,14 @@ frame.on(
     // and the index of the answer in the existing answers that corresponds to the user's selection
     const getResponseText = async (selectedPoints) => {
       let principle, percentage, index, text;
-
+      console.log("selected points: ", selectedPoints);
       // Check that a selection has been made
       if (!selectedPoints.length) {
         text = "You have not selected any point. Try again";
         return text;
       }
       index = compSelectionWithAnswers(selectedPoints);
-
+      console.log("index: ", index);
       if (index !== undefined) {
         principle = relevantAnswers[index].principle;
         const levelDocument = levelsDocuments.find(
@@ -200,8 +249,10 @@ frame.on(
 
         text = `${percentage}% of the users have reported to experience the same grouping intuition as you submitted. You goruping intuition confirms the Gestalt principle of ${principle}.`;
       } else {
+        console.log("else");
         text =
-          "Your grouping intuition matches 0% of the previously submitted reports.";
+          // "Your grouping intuition matches 0% of the previously submitted reports.";
+          "Test";
       }
       return { text, index };
     };
@@ -209,10 +260,22 @@ frame.on(
     // When the user answers correctly, he gets explanations about his/her intuition. This function matches the explanations to the current level.
     const submitAnswer = async (level, selectedPoints) => {
       const { text, index } = await getResponseText(selectedPoints);
+      console.log("submit answer receive this text: ", text);
       modalTextContainer.textContent = text;
+      console.log(modalTextContainer.textContent);
       modalLevel1.style.display = "block";
-      await updateLevelInfo();
-      await updateAnswersInfo(index, selectedPoints);
+
+      if (submittedForLevel < level) {
+        await updateLevelInfo();
+        await updateAnswersInfo(index, selectedPoints);
+
+        //update submitted for level in local storage and in file
+        submittedForLevel++;
+        localStorage.setItem(
+          "gestaltGame",
+          JSON.stringify({ answersSubmittedForLevels: submittedForLevel })
+        );
+      }
     };
 
     // === END answer submission functionality === //
@@ -233,12 +296,27 @@ frame.on(
     });
 
     // Create the levels pages
+
+    // let level0 = new Page(stageW, stageH, black).cur("none");
+    // level0.title = new Label({ text: "Chapter 2", color: white }).loc(
+    //   100,
+    //   100,
+    //   level0
+    // );
+
     let level1 = new Page(stageW, stageH, black).cur("none");
     level1.title = new Label({ text: "Level 1", color: white }).loc(
       100,
       100,
       level1
     );
+    new Button({
+      label: "REDRAW",
+    })
+      .loc(400, 600, level1)
+      .tap(() => {
+        redraw();
+      });
 
     let level2 = new Page(stageW, stageH, black).cur("none");
     level2.title = new Label({ text: "Level 2", color: white }).loc(
@@ -247,6 +325,14 @@ frame.on(
       level2
     );
 
+    new Button({
+      label: "REDRAW",
+    })
+      .loc(400, 600, level2)
+      .tap(() => {
+        redraw();
+      });
+
     let level3 = new Page(stageW, stageH, black).cur("none");
     level3.title = new Label({ text: "Level 3", color: white }).loc(
       100,
@@ -254,12 +340,28 @@ frame.on(
       level3
     );
 
+    new Button({
+      label: "REDRAW",
+    })
+      .loc(400, 600, level3)
+      .tap(() => {
+        redraw();
+      });
+
     let level4 = new Page(stageW, stageH, black).cur("none");
     level4.title = new Label({ text: "Level 4", color: white }).loc(
       100,
       100,
       level4
     );
+
+    new Button({
+      label: "REDRAW",
+    })
+      .loc(400, 600, level4)
+      .tap(() => {
+        redraw();
+      });
 
     let level5 = new Page(stageW, stageH, black).cur("none");
     level5.title = new Label({ text: "Level 5", color: white }).loc(
@@ -331,7 +433,8 @@ frame.on(
 
     let pages = new Pages({
       pages: [
-        { page: level9 },
+        { page: level1 },
+        { page: level1 },
         { page: level2 },
         { page: level3 },
         { page: level4 },
@@ -391,13 +494,14 @@ frame.on(
       });
     };
 
-    stage.on("stagemouseup", async () => {
-      if ((level > 0 && level < 5) || drawingEnabled) {
-        Ticker.remove(ticker);
+    const redraw = () => {
+      removeDrawings();
+      lineCords = [];
+    };
 
-        clearInterval(getUpdatingPenCords);
-        drawings.push(shape);
-        // console.log(drawings);
+    document.addEventListener("keydown", async (e) => {
+      if (e.key === "Enter") {
+        let sorted;
         switch (level) {
           case 1:
             selectedPoints = getSelectedPoints(level1DotsCords, lineCords);
@@ -414,13 +518,86 @@ frame.on(
           case 4:
             selectedPoints = getSelectedPoints(level4DotsCords, lineCords);
             await submitAnswer(level, selectedPoints);
+            break;
+          case 5:
+            sorted = userSelectedbtns.sort((a, b) => {
+              return a - b;
+            });
+            console.log(sorted);
+            await submitAnswer(level, sorted);
+            break;
+          case 6:
+            sorted = level6SelectedDots.sort((a, b) => {
+              return a - b;
+            });
+            await submitAnswer(level, sorted);
+            break;
+          case 7:
+            sorted = selectedSquiggles.sort((a, b) => {
+              return a - b;
+            });
+            await submitAnswer(level, sorted);
+            break;
+          case 8:
+            sorted = selectedSquiggles.sort((a, b) => {
+              return a - b;
+            });
+            await submitAnswer(level, sorted);
+            break;
+          case 9:
+            sorted = selectedRects.sort((a, b) => {
+              return a - b;
+            });
+            await submitAnswer(level, sorted);
+            break;
           case 12:
             let currentMelody = getCurrentMelody();
             selectedPoints = getSelectedPoints(currentMelody, lineCords);
             selectedGroups.push(selectedPoints);
+
+            drawingEnabled = false;
+            const { index, option } = checkAllAnswers();
+            modalTextContainer.textContent = await getTextLevel12(
+              index,
+              option
+            );
+            modalLevel1.style.display = "block";
             break;
             defualt: return;
         }
+      }
+    });
+
+    stage.on("stagemouseup", async () => {
+      if ((level > 0 && level < 5) || drawingEnabled) {
+        Ticker.remove(ticker);
+
+        clearInterval(getUpdatingPenCords);
+        drawings.push(shape);
+        console.log(drawings);
+        // switch (level) {
+        //   case 1:
+        //     selectedPoints = getSelectedPoints(level1DotsCords, lineCords);
+        //     await submitAnswer(level, selectedPoints);
+        //     break;
+        //   case 2:
+        //     selectedPoints = getSelectedPoints(level2DotsCords, lineCords);
+        //     await submitAnswer(level, selectedPoints);
+        //     break;
+        //   case 3:
+        //     selectedPoints = getSelectedPoints(level3DotsCords, lineCords);
+        //     await submitAnswer(level, selectedPoints);
+        //     break;
+        //   case 4:
+        //     selectedPoints = getSelectedPoints(level4DotsCords, lineCords);
+        //     await submitAnswer(level, selectedPoints);
+        //   case 12:
+        //     let currentMelody = getCurrentMelody();
+        //     selectedPoints = getSelectedPoints(currentMelody, lineCords);
+        //     selectedGroups.push(selectedPoints);
+        //     break;
+        //     defualt: return;
+        // }
       }
     });
 
@@ -561,6 +738,16 @@ frame.on(
       // console.log(levelDotsCords);
     }
 
+    // === LEVEL 0 INTRODUCTIOn === //
+    // const video = new Vid(
+    //   "./assets/videosgestalt_intro.mp4",
+    //   800,
+    //   600
+    // ).center(); // using 800x600
+    // stage.on("stagemousedown", () => {
+    //   video.play();
+    // });
+
     // === LEVEL 1 PROXIMITY === //
 
     let level1LatticeCords = [];
@@ -673,16 +860,16 @@ frame.on(
       level4DotsCords
     );
 
-    new Button({
-      label: "SUBMIT",
-    })
-      .loc(430, 600, level4)
-      .tap(() => {
-        for (let i = 0; i < dots.length; i++) {
-          dots[i].id == 372 ? (dots[i].color = blue) : red;
-        }
-        stage.update();
-      });
+    //     // new Button({
+    //     //   label: "SUBMIT",
+    //     // })
+    //     //   .loc(430, 600, level4)
+    //     //   .tap(() => {
+    //     //     for (let i = 0; i < dots.length; i++) {
+    //     //       dots[i].id == 372 ? (dots[i].color = blue) : red;
+    //     //     }
+    //     //     stage.update();
+    //     //   });
 
     // === LEVEL 5 CONTINUITY === //
 
@@ -703,9 +890,16 @@ frame.on(
         .loc(level5XPos - level5Step, level5YPos - level5Step, level5)
         .cur()
         .tap(() => {
-          level5Button.color = blue;
-          if (!userSelectedbtns.includes(level5Button.id))
+          if (!userSelectedbtns.includes(level5Button.id)) {
             userSelectedbtns.push(level5Button.id);
+            level5Button.color = blue;
+          } else {
+            userSelectedbtns.splice(
+              userSelectedbtns.indexOf(level5Button.id),
+              1
+            );
+            level5Button.color = red;
+          }
           stage.update();
           console.log(userSelectedbtns);
         });
@@ -721,9 +915,16 @@ frame.on(
             .loc(level5XPos, level5YPos, level5)
             .cur()
             .tap(() => {
-              level5Button.color = blue;
-              if (!userSelectedbtns.includes(level5Button.id))
+              if (!userSelectedbtns.includes(level5Button.id)) {
                 userSelectedbtns.push(level5Button.id);
+                level5Button.color = blue;
+              } else {
+                userSelectedbtns.splice(
+                  userSelectedbtns.indexOf(level5Button.id),
+                  1
+                );
+                level5Button.color = red;
+              }
               stage.update();
               console.log(userSelectedbtns);
             });
@@ -746,17 +947,17 @@ frame.on(
     }
     createLevel5Btns();
 
-    new Button({
-      label: "SUBMIT",
-    })
-      .loc(400, 650, level5)
-      .tap(async () => {
-        let sorted = userSelectedbtns.sort((a, b) => {
-          return a - b;
-        });
-        console.log(sorted);
-        await submitAnswer(level, sorted);
-      });
+    //     // new Button({
+    //     //   label: "SUBMIT",
+    //     // })
+    //     //   .loc(400, 650, level5)
+    //     //   .tap(async () => {
+    //     //     let sorted = userSelectedbtns.sort((a, b) => {
+    //     //       return a - b;
+    //     //     });
+    //     //     console.log(sorted);
+    //     //     await submitAnswer(level, sorted);
+    //     //   });
 
     // === LEVEL 6 COMMON REGION === //
 
@@ -789,9 +990,19 @@ frame.on(
             .loc(level6DotXpos, 400, level6)
             .cur()
             .tap(() => {
-              dot.color = red;
-              level6SelectedDots.push(dot.id);
+              if (!level6SelectedDots.includes(dot.id)) {
+                dot.color = red;
+                level6SelectedDots.push(dot.id);
+              } else {
+                dot.color = yellow;
+                level6SelectedDots.splice(
+                  level6SelectedDots.indexOf(dot.id),
+                  1
+                );
+              }
+
               stage.update();
+              console.log(level6SelectedDots);
             });
 
           level6DotXpos += level6DotStep;
@@ -800,16 +1011,16 @@ frame.on(
         level6DotXpos -= 50;
       }
 
-      new Button({
-        label: "SUBMIT",
-      })
-        .loc(400, 600, level6)
-        .tap(async () => {
-          let sorted = level6SelectedDots.sort((a, b) => {
-            return a - b;
-          });
-          await submitAnswer(level, sorted);
-        });
+      //     //   new Button({
+      //     //     label: "SUBMIT",
+      //     //   })
+      //     //     .loc(400, 600, level6)
+      //     //     .tap(async () => {
+      //     //       let sorted = level6SelectedDots.sort((a, b) => {
+      //     //         return a - b;
+      //     //       });
+      //     //       await submitAnswer(level, sorted);
+      // });
     }
     createLevel6Lattice();
 
@@ -877,11 +1088,20 @@ frame.on(
           .loc(xPos[i], yPos, pageNum)
           .cur()
           .tap(() => {
-            squiggle.color = blue;
-            squiggle.thickness = 10;
             console.log(squiggle.id);
-            if (!selectedSquiggles.includes(squiggle.id))
+            if (!selectedSquiggles.includes(squiggle.id)) {
+              squiggle.color = blue;
+              squiggle.thickness = 10;
               selectedSquiggles.push(squiggle.id);
+            } else {
+              squiggle.color = red;
+              squiggle.thickness = 5;
+              selectedSquiggles.splice(
+                selectedSquiggles.indexOf(squiggle.id),
+                1
+              );
+            }
+            console.log(selectedSquiggles);
             stage.update();
           });
         squiggles.push(squiggle);
@@ -890,16 +1110,16 @@ frame.on(
     createSquiggles(6, level7Points, yPosLevel7, xPosLevel7, level7);
 
     // a button to submit the user's answer and fire the checkSelection method of the CheckArrays class
-    new Button({
-      label: "SUBMIT",
-    })
-      .loc(400, 600, level7)
-      .tap(async () => {
-        let sorted = selectedSquiggles.sort((a, b) => {
-          return a - b;
-        });
-        await submitAnswer(level, sorted);
-      });
+    // new Button({
+    //   label: "SUBMIT",
+    // })
+    //   .loc(400, 600, level7)
+    //   .tap(async () => {
+    //     let sorted = selectedSquiggles.sort((a, b) => {
+    //       return a - b;
+    //     });
+    //     await submitAnswer(level, sorted);
+    //   });
 
     // === LEVEL 8 === SYMMETRY === //
 
@@ -954,16 +1174,16 @@ frame.on(
     // Call the function to create the lattice for level 8
     createSquiggles(6, level8Points, yPosLevel8, xPosLevel8, level8);
 
-    new Button({
-      label: "SUBMIT",
-    })
-      .loc(430, 600, level8)
-      .tap(async () => {
-        let sorted = selectedSquiggles.sort((a, b) => {
-          return a - b;
-        });
-        await submitAnswer(level, sorted);
-      });
+    // new Button({
+    //   label: "SUBMIT",
+    // })
+    //   .loc(430, 600, level8)
+    //   .tap(async () => {
+    //     let sorted = selectedSquiggles.sort((a, b) => {
+    //       return a - b;
+    //     });
+    //     await submitAnswer(level, sorted);
+    //   });
 
     // === LEVEL 9 HIERARCHY - CONTINUITY & SIMILARITY === //
 
@@ -1037,16 +1257,16 @@ frame.on(
     };
     createEventsForRects();
 
-    new Button({
-      label: "SUBMIT",
-    })
-      .loc(400, 670, level9)
-      .tap(async () => {
-        let sorted = selectedRects.sort((a, b) => {
-          return a - b;
-        });
-        await submitAnswer(level, sorted);
-      });
+    // new Button({
+    //   label: "SUBMIT",
+    // })
+    //   .loc(400, 670, level9)
+    //   .tap(async () => {
+    //     let sorted = selectedRects.sort((a, b) => {
+    //       return a - b;
+    //     });
+    //     await submitAnswer(level, sorted);
+    //   });
 
     // === LEVEL 11 COMPOSE === //
 
@@ -2316,10 +2536,10 @@ frame.on(
 
     document.addEventListener("keydown", async (e) => {
       if (e.key === "Enter") {
-        drawingEnabled = false;
-        const { index, option } = checkAllAnswers();
-        modalTextContainer.textContent = await getTextLevel12(index, option);
-        modalLevel1.style.display = "block";
+        // drawingEnabled = false;
+        // const { index, option } = checkAllAnswers();
+        // modalTextContainer.textContent = await getTextLevel12(index, option);
+        // modalLevel1.style.display = "block";
       }
     });
 
