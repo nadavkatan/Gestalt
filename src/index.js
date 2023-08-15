@@ -8,6 +8,8 @@ import {
   getDocs,
   updateDoc,
 } from "firebase/firestore";
+import { melody1, melody2, melody3, melody4, melody5, melody6, melody7, melody8 } from "./data/melodies";
+
 import {
   updateLevel,
   updateDocument,
@@ -15,6 +17,10 @@ import {
   getDocumentsByQuery,
   createDocument,
 } from "./utils/firestore";
+
+
+
+import {removeEmptyArrays} from "./utils/helpers/helpers"
 
 // import video2 from './assets/videosgestalt_intro.mp4'
 // === PART I === FUNDAMENTAL GESTALT PRINCIPLES === //
@@ -56,25 +62,28 @@ frame.on(
     //get dom elements
     const modalLevel1 = document.querySelector(".modal-level-1");
     const nextLevelBtn = document.querySelector(".next-level-btn");
-    const modalTextContainer = document.querySelector(".modal-body");
+    const modalTextContainer = document.querySelector(".modal-body-next");
+    const modalInstructions = document.querySelector(".modal-instructions");
+    const startLevel = document.querySelector(".start-playing");
+    const modalInstructionsText = document.querySelector(
+      ".modal-body-instructions"
+    );
     const modalFooter = document.querySelector(".modal-footer");
     const cursor = document.querySelector(".cursor");
     const zimCanvas = document.querySelector("#myCanvas");
     const level0 = document.querySelector("#level0");
     const startBtn = document.querySelector(".startApp");
+    const introVideo = document.querySelector(".intro-video");
 
     // === Firebase functionality === //
 
     const initializeGame = async () => {
       levelsDocuments = await getCollection("levels");
-      console.log(levelsDocuments);
       relevantAnswers = await getDocumentsByQuery("answers", "level", level);
-      console.log(relevantAnswers);
     };
 
     const initializeLocalStorage = () => {
-      let storedProgress = JSON.parse(localStorage.getItem("gestaltGame"));
-      console.log(storedProgress);
+       let storedProgress = JSON.parse(localStorage.getItem("gestaltGame"));
       if (!storedProgress) {
         localStorage.setItem(
           "gestaltGame",
@@ -86,15 +95,33 @@ frame.on(
     };
 
     startBtn.addEventListener("click", async () => {
-      level = 1;
-      await initializeGame();
-      initializeLocalStorage();
       zimCanvas.style.display = "block";
       level0.style.display = "none";
+      introVideo.src = "";
+      // console.log(modalInstructions);
+      if (level === 9.5) {
+        level = 10;
+        modalInstructionsText.textContent =
+          "Press the 'PLAY' button and listen carefully to the recording. Then, press the 'DRAW' button and use the cursor as a brush to circle ALL the groups that you perceive. Finally, submit your interpretation by pressing the 'ENTER' key.";
+        pages.go(level10);
+        necklacesDocuments = await getCollection("necklaces");
+        await getNecklaceAnswers(1);
+      } else {
+        level = 1;
+        await initializeGame();
+        initializeLocalStorage();
+      }
+      modalInstructions.style.display = "block";
+    });
+
+    startLevel.addEventListener("click", () => {
+      modalInstructions.style.display = "none";
     });
 
     (async function () {
       zimCanvas.style.display = "none";
+      // level0.style.display = "none";
+
       // await initializeGame();
       // initializeLocalStorage();
 
@@ -117,14 +144,12 @@ frame.on(
         "necklace",
         currentNecklace
       );
-      console.log("stored answers: ", storedNecklaceAnswers);
       necklaceAnswers = storedNecklaceAnswers.map((answer) => {
         return {
           ...answer,
           points: formatArrayTo2d(answer.points),
         };
       });
-      console.log("formatted answers: ", necklaceAnswers);
     };
 
     const formatArrayTo2d = (arr) => {
@@ -150,7 +175,6 @@ frame.on(
       }
       output.push(...arr[arr.length - 1]);
 
-      console.log(output);
       return output;
     };
 
@@ -200,7 +224,6 @@ frame.on(
           });
         }
       } else {
-        console.log("storing a new answer");
         storeNewAnswer(selectedPoints);
       }
     };
@@ -209,7 +232,6 @@ frame.on(
     const compSelectionWithAnswers = (selectedPoints) => {
       for (let i = 0; i < relevantAnswers.length; i++) {
         if (arrayEquals(relevantAnswers[i].points, selectedPoints)) {
-          console.log("answer exists: ", relevantAnswers[i]);
           return i;
         }
       }
@@ -220,14 +242,12 @@ frame.on(
     // and the index of the answer in the existing answers that corresponds to the user's selection
     const getResponseText = async (selectedPoints) => {
       let principle, percentage, index, text;
-      console.log("selected points: ", selectedPoints);
       // Check that a selection has been made
       if (!selectedPoints.length) {
         text = "You have not selected any point. Try again";
         return text;
       }
       index = compSelectionWithAnswers(selectedPoints);
-      console.log("index: ", index);
       if (index !== undefined) {
         principle = relevantAnswers[index].principle;
         const levelDocument = levelsDocuments.find(
@@ -238,21 +258,13 @@ frame.on(
             Number(levelDocument.numAnswersSubmitted)) *
           100
         ).toFixed(2);
-        console.log("timesChosen: ", relevantAnswers[index].timesChosen);
-        console.log(
-          "numAnsweredSubmitted: ",
-          levelDocument.numAnswersSubmitted
-        );
-        console.log(
-          relevantAnswers[index].timesChosen / levelDocument.numAnswersSubmitted
-        );
 
         text = `${percentage}% of the users have reported to experience the same grouping intuition as you submitted. You goruping intuition confirms the Gestalt principle of ${principle}.`;
       } else {
         console.log("else");
         text =
-          // "Your grouping intuition matches 0% of the previously submitted reports.";
-          "Test";
+          "Your grouping intuition matches 0% of the previously submitted reports.";
+        // "Test";
       }
       return { text, index };
     };
@@ -260,9 +272,7 @@ frame.on(
     // When the user answers correctly, he gets explanations about his/her intuition. This function matches the explanations to the current level.
     const submitAnswer = async (level, selectedPoints) => {
       const { text, index } = await getResponseText(selectedPoints);
-      console.log("submit answer receive this text: ", text);
       modalTextContainer.textContent = text;
-      console.log(modalTextContainer.textContent);
       modalLevel1.style.display = "block";
 
       if (submittedForLevel < level) {
@@ -305,115 +315,169 @@ frame.on(
     // );
 
     let level1 = new Page(stageW, stageH, black).cur("none");
-    level1.title = new Label({ text: "Level 1", color: white }).loc(
+    level1.title = new Label({ text: "Level 1", color: white, italic: true }).loc(
       100,
       100,
       level1
     );
+  
+    const labelLevel1 = new Label({
+      text:"Redraw",
+      size:30,
+      italic:true,
+      color: black
+   });
     new Button({
-      label: "REDRAW",
+      label: labelLevel1,
+      width:190,
+      height:60,
+      backgroundColor:"#F2D388",
+      rollBackgroundColor:"#DAC0A3",
+      borderRaius:8,
+      shadowColor:"grey",
     })
-      .loc(400, 600, level1)
+      .loc(750, 650, level1)
       .tap(() => {
         redraw();
       });
 
+
+      // TODO: update database with new dots id's
     let level2 = new Page(stageW, stageH, black).cur("none");
-    level2.title = new Label({ text: "Level 2", color: white }).loc(
+    level2.title = new Label({ text: "Level 2", color: white, italic: true }).loc(
       100,
       100,
       level2
     );
 
+    const labelLevel2 = new Label({
+      text:"Redraw",
+      size:30,
+      italic:true,
+      color: black
+   });
     new Button({
-      label: "REDRAW",
+      label: labelLevel2,
+      width:190,
+      height:60,
+      backgroundColor:"#F2D388",
+      rollBackgroundColor:"#DAC0A3",
+      borderRaius:8,
+      shadowColor:"grey",
     })
-      .loc(400, 600, level2)
+      .loc(750, 650, level2)
       .tap(() => {
         redraw();
       });
 
+
     let level3 = new Page(stageW, stageH, black).cur("none");
-    level3.title = new Label({ text: "Level 3", color: white }).loc(
+    level3.title = new Label({ text: "Level 3", color: white, italic: true }).loc(
       100,
       100,
       level3
     );
 
+    const labelLevel3 = new Label({
+      text:"Redraw",
+      size:30,
+      italic:true,
+      color: black
+   });
     new Button({
-      label: "REDRAW",
+      label: labelLevel3,
+      width:190,
+      height:60,
+      backgroundColor:"#F2D388",
+      rollBackgroundColor:"#DAC0A3",
+      borderRaius:8,
+      shadowColor:"grey",
     })
-      .loc(400, 600, level3)
+      .loc(750, 650, level3)
       .tap(() => {
         redraw();
       });
 
+
     let level4 = new Page(stageW, stageH, black).cur("none");
-    level4.title = new Label({ text: "Level 4", color: white }).loc(
+    level4.title = new Label({ text: "Level 4", color: white, italic: true }).loc(
       100,
       100,
       level4
     );
 
+    const labelLevel4 = new Label({
+      text:"Redraw",
+      size:30,
+      italic:true,
+      color: black
+   });
     new Button({
-      label: "REDRAW",
+      label: labelLevel4,
+      width:190,
+      height:60,
+      backgroundColor:"#F2D388",
+      rollBackgroundColor:"#DAC0A3",
+      borderRaius:8,
+      shadowColor:"grey",
     })
-      .loc(400, 600, level4)
+      .loc(750, 650, level4)
       .tap(() => {
         redraw();
       });
 
+
     let level5 = new Page(stageW, stageH, black).cur("none");
-    level5.title = new Label({ text: "Level 5", color: white }).loc(
+    level5.title = new Label({ text: "Level 5", color: white, italic: true }).loc(
       100,
       100,
       level5
     );
 
     let level6 = new Page(stageW, stageH, black).cur("none");
-    level6.title = new Label({ text: "Level 6", color: white }).loc(
+    level6.title = new Label({ text: "Level 6", color: white, italic: true }).loc(
       100,
       100,
       level6
     );
 
     let level7 = new Page(stageW, stageH, black).cur("none");
-    level7.title = new Label({ text: "Level 7", color: white }).loc(
+    level7.title = new Label({ text: "Level 7", color: white, italic: true }).loc(
       100,
       100,
       level7
     );
 
     let level8 = new Page(stageW, stageH, black).cur("none");
-    level8.title = new Label({ text: "Level 8", color: white }).loc(
+    level8.title = new Label({ text: "Level 8", color: white, italic: true }).loc(
       100,
       100,
       level8
     );
 
     let level9 = new Page(stageW, stageH, black).cur("none");
-    level9.title = new Label({ text: "Level 9", color: white }).loc(
+    level9.title = new Label({ text: "Level 9", color: white, italic: true }).loc(
       100,
       100,
       level9
     );
 
     let level10 = new Page(stageW, stageH, black).cur("grab");
-    level10.title = new Label({ text: "Level 10", color: white }).loc(
+    level10.title = new Label({ text: "Level 10", color: white, italic: true }).loc(
       100,
       100,
       level10
     );
 
     let level11 = new Page(stageW, stageH, black).cur("grab");
-    level11.title = new Label({ text: "Level 11", color: white }).loc(
+    level11.title = new Label({ text: "Level 11", color: white, italic: true  }).loc(
       100,
       100,
       level11
     );
 
     let level12 = new Page(stageW, stageH, black).cur("grab");
-    level12.title = new Label({ text: "Level 12", color: white }).loc(
+    level12.title = new Label({ text: "Level 12", color: white, italic: true  }).loc(
       100,
       100,
       level12
@@ -429,11 +493,10 @@ frame.on(
     level9.name = "level 9";
     level10.name = "level 10";
     level11.name = "level 11";
-    level11.name = "level 12";
+    level12.name = "level 12";
 
     let pages = new Pages({
       pages: [
-        { page: level1 },
         { page: level1 },
         { page: level2 },
         { page: level3 },
@@ -471,13 +534,13 @@ frame.on(
       if (level > 0 && level < 5) {
         draw();
       }
-      if (level === 12 && drawingEnabled) {
+      // if (level === 12 && drawingEnabled) {
+      if (level === 10 && drawingEnabled) {
         draw();
       }
     });
 
     const draw = () => {
-      // console.log("level is between range");
       shape = new Shape().addTo();
       shape.s(pink).ss(5);
 
@@ -523,7 +586,6 @@ frame.on(
             sorted = userSelectedbtns.sort((a, b) => {
               return a - b;
             });
-            console.log(sorted);
             await submitAnswer(level, sorted);
             break;
           case 6:
@@ -550,16 +612,14 @@ frame.on(
             });
             await submitAnswer(level, sorted);
             break;
-          case 12:
-            let currentMelody = getCurrentMelody();
-            selectedPoints = getSelectedPoints(currentMelody, lineCords);
-            selectedGroups.push(selectedPoints);
-
+          // case 12:
+          case 10:
             drawingEnabled = false;
-            const { index, option } = checkAllAnswers();
-            modalTextContainer.textContent = await getTextLevel12(
+            const { index, option, answer } = checkAllAnswers();
+            modalTextContainer.textContent = await getTextLevel10(
               index,
-              option
+              option, 
+              answer
             );
             modalLevel1.style.display = "block";
             break;
@@ -574,30 +634,13 @@ frame.on(
 
         clearInterval(getUpdatingPenCords);
         drawings.push(shape);
-        console.log(drawings);
-        // switch (level) {
-        //   case 1:
-        //     selectedPoints = getSelectedPoints(level1DotsCords, lineCords);
-        //     await submitAnswer(level, selectedPoints);
-        //     break;
-        //   case 2:
-        //     selectedPoints = getSelectedPoints(level2DotsCords, lineCords);
-        //     await submitAnswer(level, selectedPoints);
-        //     break;
-        //   case 3:
-        //     selectedPoints = getSelectedPoints(level3DotsCords, lineCords);
-        //     await submitAnswer(level, selectedPoints);
-        //     break;
-        //   case 4:
-        //     selectedPoints = getSelectedPoints(level4DotsCords, lineCords);
-        //     await submitAnswer(level, selectedPoints);
-        //   case 12:
-        //     let currentMelody = getCurrentMelody();
-        //     selectedPoints = getSelectedPoints(currentMelody, lineCords);
-        //     selectedGroups.push(selectedPoints);
-        //     break;
-        //     defualt: return;
-        // }
+
+        // TODO: don't push another array to selected groups if user completes the same line, or when presses one of the buttons
+        if (level === 10 && drawingEnabled) {
+          let currentMelody = getCurrentMelody();
+          selectedPoints = getSelectedPoints(currentMelody, lineCords);
+          selectedGroups.push(selectedPoints);
+        }
       }
     });
 
@@ -657,7 +700,6 @@ frame.on(
           cordsWithoutDuplicates
         );
         if (pointInCircle) {
-          // console.log("point inside");
           selectedPoints.push(latticeDots.cords[i].id);
         }
       }
@@ -696,7 +738,6 @@ frame.on(
         y2: initialValueY + rows * step - 30,
       });
 
-      console.log(levelDotsCords);
     }
     let dots = [];
     // lattice with circles
@@ -737,16 +778,6 @@ frame.on(
 
       // console.log(levelDotsCords);
     }
-
-    // === LEVEL 0 INTRODUCTIOn === //
-    // const video = new Vid(
-    //   "./assets/videosgestalt_intro.mp4",
-    //   800,
-    //   600
-    // ).center(); // using 800x600
-    // stage.on("stagemousedown", () => {
-    //   video.play();
-    // });
 
     // === LEVEL 1 PROXIMITY === //
 
@@ -838,7 +869,7 @@ frame.on(
     let level4DotsCords = { name: "level4", cords: [] };
 
     createLattice(
-      700,
+      520,
       150,
       7,
       1,
@@ -849,7 +880,7 @@ frame.on(
       level4DotsCords
     );
     createLattice(
-      350,
+      170,
       500,
       1,
       15,
@@ -859,17 +890,6 @@ frame.on(
       level4LatticeCords,
       level4DotsCords
     );
-
-    //     // new Button({
-    //     //   label: "SUBMIT",
-    //     // })
-    //     //   .loc(430, 600, level4)
-    //     //   .tap(() => {
-    //     //     for (let i = 0; i < dots.length; i++) {
-    //     //       dots[i].id == 372 ? (dots[i].color = blue) : red;
-    //     //     }
-    //     //     stage.update();
-    //     //   });
 
     // === LEVEL 5 CONTINUITY === //
 
@@ -901,7 +921,6 @@ frame.on(
             level5Button.color = red;
           }
           stage.update();
-          console.log(userSelectedbtns);
         });
 
       //number of sides
@@ -926,7 +945,6 @@ frame.on(
                 level5Button.color = red;
               }
               stage.update();
-              console.log(userSelectedbtns);
             });
           if (level5Counter % 2 === 0) {
             level5YPos -= level5Step;
@@ -946,18 +964,6 @@ frame.on(
       return level5Buttons;
     }
     createLevel5Btns();
-
-    //     // new Button({
-    //     //   label: "SUBMIT",
-    //     // })
-    //     //   .loc(400, 650, level5)
-    //     //   .tap(async () => {
-    //     //     let sorted = userSelectedbtns.sort((a, b) => {
-    //     //       return a - b;
-    //     //     });
-    //     //     console.log(sorted);
-    //     //     await submitAnswer(level, sorted);
-    //     //   });
 
     // === LEVEL 6 COMMON REGION === //
 
@@ -1002,7 +1008,6 @@ frame.on(
               }
 
               stage.update();
-              console.log(level6SelectedDots);
             });
 
           level6DotXpos += level6DotStep;
@@ -1088,7 +1093,6 @@ frame.on(
           .loc(xPos[i], yPos, pageNum)
           .cur()
           .tap(() => {
-            console.log(squiggle.id);
             if (!selectedSquiggles.includes(squiggle.id)) {
               squiggle.color = blue;
               squiggle.thickness = 10;
@@ -1101,25 +1105,12 @@ frame.on(
                 1
               );
             }
-            console.log(selectedSquiggles);
             stage.update();
           });
         squiggles.push(squiggle);
       }
     }
     createSquiggles(6, level7Points, yPosLevel7, xPosLevel7, level7);
-
-    // a button to submit the user's answer and fire the checkSelection method of the CheckArrays class
-    // new Button({
-    //   label: "SUBMIT",
-    // })
-    //   .loc(400, 600, level7)
-    //   .tap(async () => {
-    //     let sorted = selectedSquiggles.sort((a, b) => {
-    //       return a - b;
-    //     });
-    //     await submitAnswer(level, sorted);
-    //   });
 
     // === LEVEL 8 === SYMMETRY === //
 
@@ -1173,17 +1164,6 @@ frame.on(
 
     // Call the function to create the lattice for level 8
     createSquiggles(6, level8Points, yPosLevel8, xPosLevel8, level8);
-
-    // new Button({
-    //   label: "SUBMIT",
-    // })
-    //   .loc(430, 600, level8)
-    //   .tap(async () => {
-    //     let sorted = selectedSquiggles.sort((a, b) => {
-    //       return a - b;
-    //     });
-    //     await submitAnswer(level, sorted);
-    //   });
 
     // === LEVEL 9 HIERARCHY - CONTINUITY & SIMILARITY === //
 
@@ -1256,17 +1236,6 @@ frame.on(
       });
     };
     createEventsForRects();
-
-    // new Button({
-    //   label: "SUBMIT",
-    // })
-    //   .loc(400, 670, level9)
-    //   .tap(async () => {
-    //     let sorted = selectedRects.sort((a, b) => {
-    //       return a - b;
-    //     });
-    //     await submitAnswer(level, sorted);
-    //   });
 
     // === LEVEL 11 COMPOSE === //
 
@@ -1358,37 +1327,26 @@ frame.on(
 
     function determineAudioSrc(y, synth, vol) {
       if (y <= 531 && y >= 520) {
-        console.log("note d");
         return synth.triggerAttackRelease("D4", "16n", undefined, vol);
       } else if (y <= 521 && y >= 495) {
-        console.log("note e");
         return synth.triggerAttackRelease("E4", "16n", undefined, vol);
       } else if (y <= 494 && y >= 470) {
-        console.log("note f");
         return synth.triggerAttackRelease("F4", "16n", undefined, vol);
       } else if (y <= 469 && y >= 448) {
-        console.log("note g");
         return synth.triggerAttackRelease("G4", "16n", undefined, vol);
       } else if (y <= 447 && y >= 415) {
-        console.log("note a");
         return synth.triggerAttackRelease("A4", "16n", undefined, vol);
       } else if (y <= 414 && y >= 397) {
-        console.log("note b");
         return synth.triggerAttackRelease("B4", "16n", undefined, vol);
       } else if (y <= 396 && y >= 364) {
-        console.log("note c2");
         return synth.triggerAttackRelease("C5", "16n", undefined, vol);
       } else if (y <= 363 && y >= 343) {
-        console.log("note d2");
         return synth.triggerAttackRelease("D5", "16n", undefined, vol);
       } else if (y <= 342 && y >= 319) {
-        console.log("note e2");
         return synth.triggerAttackRelease("E5", "16n", undefined, vol);
       } else if (y <= 318 && y >= 295) {
-        console.log("note f2");
         return synth.triggerAttackRelease("F5", "16n", undefined, vol);
       } else if (y <= 294 && y >= 272) {
-        console.log("note g2");
         return synth.triggerAttackRelease("G5", "16n", undefined, vol);
       }
     }
@@ -1462,18 +1420,17 @@ frame.on(
     let note = new Circle({
       color: yellow,
       radius: 15,
-      interactive: false,
+      // interactive: false,
     })
       .loc(100, 100, level11)
       .drag();
 
     note.on("dblclick", () => {
-      console.log("double");
       note.removeFrom(level11);
       stage.update();
     });
 
-    // === LEVEL 11 ANIMATION GAME === //
+    // === LEVEL 12 ANIMATION GAME === //
     let gestaltPrinciples = ["proximity", "similarity", "continuity"];
     let currentlyCorrect = gestaltPrinciples[1];
 
@@ -2072,7 +2029,7 @@ frame.on(
           let element = new Blob({
             points: blobPoints,
             interactive: false,
-          }).loc(columns[column], rows[row], level10);
+          }).loc(columns[column], rows[row], level12);
           elements.push(element);
         }
       }
@@ -2080,7 +2037,7 @@ frame.on(
       let btn = new Button({
         label: "Start",
       })
-        .loc(100, 200, level10)
+        .loc(100, 200, level12)
         .tap(() => {
           animate();
         });
@@ -2089,35 +2046,35 @@ frame.on(
     let proximityBtn = new Button({
       label: "Proximity",
     })
-      .loc(100, 600, level10)
+      .loc(100, 600, level12)
       .tap(() => {
         animate();
       });
     let similarityBtn = new Button({
       label: "Similarity",
     })
-      .loc(100, 400, level10)
+      .loc(100, 400, level12)
       .tap(() => {
         animate();
       });
     let continuityBtn = new Button({
       label: "Continuity",
     })
-      .loc(1100, 600, level10)
+      .loc(1100, 600, level12)
       .tap(() => {
         animate();
       });
     let commonFateBtn = new Button({
       label: "Common fate",
     })
-      .loc(1100, 400, level10)
+      .loc(1100, 400, level12)
       .tap(() => {
         animate();
       });
     let commonRegionBtn = new Button({
       label: "Common region",
     })
-      .loc(1100, 200, level10)
+      .loc(1100, 200, level12)
       .tap(() => {
         animate();
       });
@@ -2131,7 +2088,7 @@ frame.on(
 
     // === END ANIMATION GAME === //
 
-    // === LEVEL 12 === //
+    // === LEVEL 10 === //
 
     let currentNecklace = 1;
 
@@ -2140,168 +2097,8 @@ frame.on(
       borderColor: white,
       borderWidth: 4,
       radius: 250,
-    }).loc(700, 400, level12);
+    }).loc(700, 400, level10);
 
-    const defaultVol = 0.7;
-
-    //Prox in pitch
-    let melody1 = {
-      sounds: [
-        { x: 100, y: 525, synth: synth, vol: defaultVol },
-        { x: 200, y: 525, synth: synth, vol: defaultVol },
-        { x: 300, y: 425, synth: synth, vol: defaultVol },
-        { x: 400, y: 425, synth: synth, vol: defaultVol },
-      ],
-      cords: [
-        { x: 450, y: 400, id: 1 },
-        { x: 700, y: 150, id: 2 },
-        { x: 950, y: 400, id: 3 },
-        { x: 700, y: 650, id: 4 },
-      ],
-    };
-
-    //Prox in time
-    let melody2 = {
-      sounds: [
-        { x: 100, y: 525, synth: synth, vol: defaultVol },
-        { x: 150, y: 525, synth: synth, vol: defaultVol },
-        { x: 350, y: 525, synth: synth, vol: defaultVol },
-        { x: 400, y: 525, synth: synth, vol: defaultVol },
-      ],
-      cords: [
-        { x: 450, y: 400, id: 5 },
-        { x: 700, y: 150, id: 6 },
-        { x: 950, y: 400, id: 7 },
-        { x: 700, y: 650, id: 8 },
-      ],
-    };
-
-    let melody3 = {
-      sounds: [
-        { x: 100, y: 450, synth: synth, vol: defaultVol },
-        { x: 200, y: 450, synth: synth, vol: defaultVol },
-        { x: 250, y: 500, synth: synth, vol: defaultVol },
-        { x: 350, y: 500, synth: synth, vol: defaultVol },
-        { x: 400, y: 475, synth: synth, vol: defaultVol },
-        { x: 500, y: 475, synth: synth, vol: defaultVol },
-        { x: 550, y: 525, synth: synth, vol: defaultVol },
-        { x: 650, y: 525, synth: synth, vol: defaultVol },
-      ],
-      cords: [
-        { x: 700, y: 150, id: 1 },
-        { x: 870, y: 230, id: 2 },
-        { x: 950, y: 400, id: 3 },
-        { x: 870, y: 570, id: 4 },
-        { x: 700, y: 650, id: 5 },
-        { x: 530, y: 570, id: 6 },
-        { x: 450, y: 400, id: 7 },
-        { x: 530, y: 230, id: 8 },
-      ],
-    };
-
-    let melody4 = {
-      sounds: [
-        { x: 100, y: 525, synth: synth, vol: defaultVol },
-        { x: 175, y: 500, synth: synth, vol: defaultVol },
-        { x: 250, y: 475, synth: synth, vol: defaultVol },
-        { x: 325, y: 450, synth: synth, vol: defaultVol },
-        { x: 400, y: 425, synth: synth, vol: defaultVol },
-        { x: 475, y: 400, synth: amSynth, vol: defaultVol },
-        { x: 550, y: 375, synth: amSynth, vol: defaultVol },
-        { x: 625, y: 350, synth: amSynth, vol: defaultVol },
-      ],
-      cords: [
-        { x: 700, y: 150, id: 1 },
-        { x: 870, y: 230, id: 2 },
-        { x: 950, y: 400, id: 3 },
-        { x: 870, y: 570, id: 4 },
-        { x: 700, y: 650, id: 5 },
-        { x: 530, y: 570, id: 6 },
-        { x: 450, y: 400, id: 7 },
-        { x: 530, y: 230, id: 8 },
-      ],
-    };
-
-    let melody5 = {
-      sounds: [
-        { x: 100, y: 525, synth: synth, vol: defaultVol },
-        { x: 200, y: 525, synth: synth, vol: defaultVol },
-        { x: 300, y: 525, synth: synth, vol: 1.4 },
-        { x: 400, y: 525, synth: synth, vol: 1.4 },
-      ],
-      cords: [
-        { x: 450, y: 400, id: 1 },
-        { x: 700, y: 150, id: 2 },
-        { x: 950, y: 400, id: 3 },
-        { x: 700, y: 650, id: 4 },
-      ],
-    };
-
-    let melody6 = {
-      sounds: [
-        { x: 100, y: 500, synth: synth, vol: defaultVol },
-        { x: 175, y: 400, synth: synth, vol: defaultVol },
-        { x: 250, y: 400, synth: synth, vol: defaultVol },
-        { x: 325, y: 500, synth: synth, vol: defaultVol },
-        { x: 400, y: 400, synth: synth, vol: defaultVol },
-        { x: 475, y: 400, synth: synth, vol: defaultVol },
-        { x: 550, y: 500, synth: synth, vol: defaultVol },
-        { x: 625, y: 400, synth: synth, vol: defaultVol },
-        { x: 700, y: 400, synth: synth, vol: defaultVol },
-      ],
-      cords: [
-        { x: 460, y: 460, id: 1 },
-        { x: 470, y: 300, id: 2 },
-        { x: 580, y: 185, id: 3 },
-        { x: 770, y: 165, id: 4 },
-        { x: 900, y: 270, id: 5 },
-        { x: 940, y: 450, id: 6 },
-        { x: 855, y: 585, id: 7 },
-        { x: 700, y: 650, id: 8 },
-        { x: 550, y: 590, id: 9 },
-      ],
-    };
-
-    let melody7 = {
-      sounds: [
-        { x: 100, y: 325, synth: synth, vol: defaultVol },
-        { x: 130, y: 300, synth: synth, vol: defaultVol },
-        { x: 160, y: 280, synth: synth, vol: defaultVol },
-        { x: 190, y: 300, synth: synth, vol: defaultVol },
-        { x: 220, y: 525, synth: synth, vol: defaultVol },
-        { x: 250, y: 525, synth: synth, vol: defaultVol },
-        { x: 280, y: 500, synth: synth, vol: defaultVol },
-      ],
-      cords: [
-        { x: 560, y: 600, id: 1 },
-        { x: 455, y: 450, id: 2 },
-        { x: 510, y: 250, id: 3 },
-        { x: 700, y: 150, id: 4 },
-        { x: 900, y: 260, id: 5 },
-        { x: 940, y: 460, id: 6 },
-        { x: 810, y: 620, id: 7 },
-      ],
-    };
-    let melody8 = {
-      sounds: [
-        { x: 100, y: 475, synth: synth, vol: defaultVol },
-        { x: 160, y: 450, synth: synth, vol: defaultVol },
-        { x: 220, y: 425, synth: synth, vol: defaultVol },
-        { x: 250, y: 450, synth: synth, vol: defaultVol },
-        { x: 280, y: 425, synth: synth, vol: defaultVol },
-        { x: 310, y: 400, synth: synth, vol: defaultVol },
-        { x: 340, y: 375, synth: synth, vol: defaultVol },
-      ],
-      cords: [
-        { x: 900, y: 260, id: 1 },
-        { x: 940, y: 460, id: 2 },
-        { x: 810, y: 620, id: 3 },
-        { x: 560, y: 600, id: 4 },
-        { x: 455, y: 450, id: 5 },
-        { x: 510, y: 250, id: 6 },
-        { x: 700, y: 150, id: 7 },
-      ],
-    };
 
     xPos = [450, 700, 950, 700];
     yPos = [400, 150, 400, 650];
@@ -2312,7 +2109,7 @@ frame.on(
         let dot = new Circle({
           color: color,
           radius: 20,
-        }).loc(melody.cords[i].x, melody.cords[i].y, level12);
+        }).loc(melody.cords[i].x, melody.cords[i].y, level10);
         melodyDots.push(dot);
       }
     };
@@ -2336,7 +2133,6 @@ frame.on(
           if (counter < melody.sounds.length - 1) {
             inner();
           }
-          // console.log(melody[counter+1].x - melody[counter].x)
         }, (melody.sounds[counter + 1].x - melody.sounds[counter].x) * 10);
       }
       inner();
@@ -2349,7 +2145,6 @@ frame.on(
       //     stage.update()
       //   }
       // }
-      console.log(drawings);
       for (let i = 0; i < drawings.length; i++) {
         drawings[i].removeFrom();
       }
@@ -2358,7 +2153,6 @@ frame.on(
     };
 
     const removeDots = () => {
-      console.log(melodyDots);
       for (let i = 0; i < melodyDots.length; i++) {
         melodyDots[i].removeFrom();
       }
@@ -2388,13 +2182,34 @@ frame.on(
           break;
         case 8:
           createMelodyDots(melody8, green);
+          break;
+        case 9:
+        // zimCanvas.style.display = "none";
+        // modalInstructions.textContent =
+        // "That the end of the currently developed app. Next, will be a video that summarizes the auditory grouping principles and discussing the morotiraclly-imposed grouping principles. Following this video will be the motorically-imposed groupings part.";
+        // level0.style.display = "flex";
+        //   // introVideo.src =
+        //   //   "../src/assets/videos/Transition visual to auditory.mp4";
+        //   introVideo.src = "https://www.youtube.com/embed?v=vOO6-w-MrmA";
       }
     };
 
-    let playBtnLevel12 = new Button({
-      label: "Play",
+    const playLabelLevel10 = new Label({
+      text:"Play",
+      size:30,
+      italic:true,
+      color: black
+   });
+    let playBtnLevel10 = new Button({
+      label: playLabelLevel10,
+      width:190,
+      height:60,
+      backgroundColor:"#4477CE",
+      rollBackgroundColor:"#1D5D9B",
+      borderRaius:8,
+      shadowColor:"grey",
     })
-      .loc(200, 200, level12)
+      .loc(150, 220, level10)
       .tap(() => {
         if (playingCompleted) {
           switch (currentNecklace) {
@@ -2435,10 +2250,22 @@ frame.on(
         }
       });
 
+      const drawLabelLevel10 = new Label({
+        text:"Draw",
+        size:30,
+        italic:true,
+        color: black
+     });
     let drawBtn = new Button({
-      label: "Draw",
+      label: drawLabelLevel10,
+      width:190,
+      height:60,
+      backgroundColor:"#F2D388",
+      rollBackgroundColor:"#DAC0A3",
+      borderRaius:8,
+      shadowColor:"grey",
     })
-      .loc(200, 600, level12)
+      .loc(150, 370, level10)
       .tap(() => {
         if (playingCompleted) {
           drawBtn.backgroundColor === purple
@@ -2446,8 +2273,28 @@ frame.on(
             : (drawBtn.backgroundColor = purple);
           drawingEnabled = !drawingEnabled;
         }
-        console.log("Drawing: " + drawingEnabled);
       });
+
+      const redrawLabelLevel10 = new Label({
+        text:"Redraw",
+        size:30,
+        italic:true,
+        color: black
+     });
+      new Button({
+        label: redrawLabelLevel10,
+        width:190,
+        height:60,
+        backgroundColor:"#F2D388",
+        rollBackgroundColor:"#DAC0A3",
+        borderRaius:8,
+        shadowColor:"grey",
+      })
+        .loc(150, 520, level10)
+        .tap(() => {
+          selectedGroups = [];
+          redraw();
+        });
 
     const sort2dArr = (arr) => {
       arr.sort(sortFunction);
@@ -2463,16 +2310,18 @@ frame.on(
     };
 
     let checkAnswer = (answer, possibleAnswer) => {
-      let sortedAnswer = sort2dArr(answer);
       let x = true;
+      const sortedAnswer = sort2dArr(answer)
       // check length of higher level array
       if (sortedAnswer.length !== possibleAnswer.length) {
         x = false;
+        return x
       }
       //check lengths of inner arrays
       for (let i = 0; i < sortedAnswer.length; i++) {
         if (sortedAnswer[i].length !== possibleAnswer[i].length) {
           x = false;
+          return x
         }
       }
 
@@ -2491,19 +2340,23 @@ frame.on(
     const checkAllAnswers = () => {
       let index;
       let relevantOption;
+      let answer // this answer is used when we do not find an existing possible answer
+      let selectedGroupsWithoutEmptyArray = removeEmptyArrays(selectedGroups)  //Remove empty subarrays
+
       for (let option = 0; option < necklaceAnswers.length; option++) {
-        console.log(necklaceAnswers[option].points);
-        console.log(selectedGroups);
-        if (checkAnswer(selectedGroups, necklaceAnswers[option].points)) {
+        if (checkAnswer(selectedGroupsWithoutEmptyArray, necklaceAnswers[option].points)) {
           index = option;
           relevantOption = necklaceAnswers[option];
-          console.log("relevant option: ", relevantOption);
         }
       }
-      return { index: index, option: relevantOption };
+      if(!index) {
+        // Index is underfined is the submitted answer does not match to any of the existing possible answers
+        answer = formatArrayTo1d(selectedGroupsWithoutEmptyArray)
+      }
+      return { index: index, option: relevantOption, answer: answer };
     };
 
-    const getTextLevel12 = async (index, option) => {
+    const getTextLevel10 = async (index, option, answer) => {
       let principle, percentage, text;
       if (index !== undefined && option !== undefined) {
         principle = option.principle;
@@ -2528,20 +2381,35 @@ frame.on(
 
         text = `${percentage}% of the users have reported to experience the same grouping intuition as you submitted. You goruping intuition confirms the Gestalt principle of ${principle}.`;
       } else {
+
+        if(answer.length && submittedForLevel < level){
+        // add document to database with new answer
+        const newAnswer = {
+          answerClass: null, 
+          necklace: currentNecklace,
+          points: answer,
+          principle: null, 
+          timesChosen: 1
+        }
+        await createDocument("level12Answers", newAnswer)
+        } else {
+          console.error("Couldn't save new answer'")
+        }
+
         text =
           "Your grouping intuition matches 0% of the previously submitted reports.";
       }
       return text;
     };
 
-    document.addEventListener("keydown", async (e) => {
-      if (e.key === "Enter") {
-        // drawingEnabled = false;
-        // const { index, option } = checkAllAnswers();
-        // modalTextContainer.textContent = await getTextLevel12(index, option);
-        // modalLevel1.style.display = "block";
-      }
-    });
+    // document.addEventListener("keydown", async (e) => {
+    //   if (e.key === "Enter") {
+    // drawingEnabled = false;
+    // const { index, option } = checkAllAnswers();
+    // modalTextContainer.textContent = await getTextLevel10(index, option);
+    // modalLevel1.style.display = "block";
+    //   }
+    // });
 
     const getCurrentMelody = () => {
       switch (currentNecklace) {
@@ -2576,12 +2444,20 @@ frame.on(
       }
       level++;
       relevantAnswers = await getDocumentsByQuery("answers", "level", level);
-      console.log(relevantAnswers);
+      setTimeout(() => {
+        if (level === 5) {
+          modalInstructionsText.textContent =
+            "Select a group that you perceive by clicking on the elements with the cursor. Submit you selection by pressing the 'Enter' key.";
+        }
+        modalInstructions.style.display = "block";
+      }, 1000);
     };
 
     //Move to the next level functionlity
     nextLevelBtn.addEventListener("click", async () => {
-      modalLevel1.style.display = "none";
+      if (currentNecklace !== 8) {
+        modalLevel1.style.display = "none";
+      }
       switch (level) {
         case 1:
           await goToNextLevel(level2);
@@ -2609,34 +2485,27 @@ frame.on(
           await goToNextLevel(level9);
           break;
         case 9:
-          // pages.go(level10);
-          // level++;
-          pages.go(level12);
-          level = 12;
-          // if (level < 5) {
-          //   shape.removeFrom(stage);
-          //   stage.update();
-          // }
-          necklacesDocuments = await getCollection("necklaces");
-          console.log(necklacesDocuments);
-          await getNecklaceAnswers(1);
+          level = 9.5;
+          zimCanvas.style.display = "none";
+          level0.style.display = "flex";
+          introVideo.src = "https://www.youtube.com/embed/vOO6-w-MrmA";
           break;
         case 10:
-          pages.go(level11);
-          level++;
-          break;
-        case 12:
-          selectedGroups = [];
-          removeDrawings();
-          removeDots();
-          currentNecklace++;
-          await getNecklaceAnswers(currentNecklace);
-          nextNecklace();
-          drawBtn.backgroundColor = orange;
-          stage.update();
+          if (currentNecklace === 8) {
+            modalTextContainer.textContent =
+              "That is the end of the currently developed app. Next, will be a video that summarizes the auditory grouping principles and discussing the morotiraclly-imposed grouping principles. Following that video will be the motorically-imposed groupings part.";
+          } else {
+            selectedGroups = [];
+            removeDrawings();
+            removeDots();
+            currentNecklace++;
+            await getNecklaceAnswers(currentNecklace);
+            nextNecklace();
+            drawBtn.backgroundColor = orange;
+            stage.update();
+          }
       }
     });
-
     stage.update();
   },
   null,
