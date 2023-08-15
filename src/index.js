@@ -1,15 +1,5 @@
 import _ from "lodash";
-import { db } from "./firebase";
-import {
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  getDocs,
-  updateDoc,
-} from "firebase/firestore";
 import { melody1, melody2, melody3, melody4, melody5, melody6, melody7, melody8 } from "./data/melodies";
-
 import {
   updateLevel,
   updateDocument,
@@ -17,10 +7,7 @@ import {
   getDocumentsByQuery,
   createDocument,
 } from "./utils/firestore";
-
-
-
-import {removeEmptyArrays} from "./utils/helpers/helpers"
+import { removeEmptyArrays, formatArrayTo1d, formatArrayTo2d, arrayEquals, convertToArr } from "./utils/helpers/helpers"
 
 // import video2 from './assets/videosgestalt_intro.mp4'
 // === PART I === FUNDAMENTAL GESTALT PRINCIPLES === //
@@ -98,7 +85,6 @@ frame.on(
       zimCanvas.style.display = "block";
       level0.style.display = "none";
       introVideo.src = "";
-      // console.log(modalInstructions);
       if (level === 9.5) {
         level = 10;
         modalInstructionsText.textContent =
@@ -116,6 +102,10 @@ frame.on(
 
     startLevel.addEventListener("click", () => {
       modalInstructions.style.display = "none";
+      if(startLevel.textContent === "Try again"){
+        removeDrawings()
+        startLevel.textContent === "Start"
+      }
     });
 
     (async function () {
@@ -152,32 +142,6 @@ frame.on(
       });
     };
 
-    const formatArrayTo2d = (arr) => {
-      let breakpointsIndexes = [];
-      let output = [];
-      for (let i = 0; i < arr.length; i++) {
-        if (arr[i] === "separator") {
-          breakpointsIndexes.push(i);
-        }
-      }
-      for (let j = breakpointsIndexes.length - 1; j >= 0; j--) {
-        output.push(arr.splice(breakpointsIndexes[j] + 1, arr.length));
-        arr.pop();
-      }
-      output.push(arr);
-      return output.reverse();
-    };
-
-    const formatArrayTo1d = (arr) => {
-      let output = [];
-      for (let i = 0; i < arr.length - 1; i++) {
-        output.push(...arr[i], "separator");
-      }
-      output.push(...arr[arr.length - 1]);
-
-      return output;
-    };
-
     const updateLevelInfo = async () => {
       const relevantLevelDocument = levelsDocuments.find(
         (doc) => doc.level === level
@@ -201,15 +165,6 @@ frame.on(
 
     // === Functionality of submitting, checking and responding to answers === //
 
-    // Function that checks whether two (sorted) arrays are identical
-    const arrayEquals = (a, b) => {
-      return (
-        Array.isArray(a) &&
-        Array.isArray(b) &&
-        a.length === b.length &&
-        a.every((val, index) => val === b[index])
-      );
-    };
 
     //Function that updates the answer and its common class answers in the db, or store a new answer if the user's
     // submission does not already exists in the db
@@ -305,14 +260,7 @@ frame.on(
       }, 500);
     });
 
-    // Create the levels pages
-
-    // let level0 = new Page(stageW, stageH, black).cur("none");
-    // level0.title = new Label({ text: "Chapter 2", color: white }).loc(
-    //   100,
-    //   100,
-    //   level0
-    // );
+    // === Create the level and corresponding ZIM PAGES === //
 
     let level1 = new Page(stageW, stageH, black).cur("none");
     level1.title = new Label({ text: "Level 1", color: white, italic: true }).loc(
@@ -342,7 +290,6 @@ frame.on(
       });
 
 
-      // TODO: update database with new dots id's
     let level2 = new Page(stageW, stageH, black).cur("none");
     level2.title = new Label({ text: "Level 2", color: white, italic: true }).loc(
       100,
@@ -514,7 +461,7 @@ frame.on(
       speed: 1,
     }).addTo();
 
-    // === Create levels pages END === //
+    // === Create level pages END === //
 
     // === set up the dynamic drawing functionality === //
     let ticker;
@@ -531,11 +478,7 @@ frame.on(
     };
 
     stage.on("stagemousedown", () => {
-      if (level > 0 && level < 5) {
-        draw();
-      }
-      // if (level === 12 && drawingEnabled) {
-      if (level === 10 && drawingEnabled) {
+      if ((level > 0 && level < 5) || (level === 10 && drawingEnabled)) {
         draw();
       }
     });
@@ -612,16 +555,25 @@ frame.on(
             });
             await submitAnswer(level, sorted);
             break;
-          // case 12:
           case 10:
             drawingEnabled = false;
-            const { index, option, answer } = checkAllAnswers();
-            modalTextContainer.textContent = await getTextLevel10(
-              index,
-              option, 
-              answer
-            );
-            modalLevel1.style.display = "block";
+            if(selectedGroups.length === 1){
+              // User selected only one gorup when minimum is two
+              modalInstructionsText.textContent = "You selected only one group. Try to select all the available groups that you perceive."
+              startLevel.textContent = "Try again"
+              modalInstructions.style.display = "block";
+              selectedGroups = []
+              drawBtn.backgroundColor = "#F2D388"
+            } else {
+              const { index, option, answer } = checkAllAnswers();
+              modalTextContainer.textContent = await getTextLevel10(
+                index,
+                option, 
+                answer
+              );
+              modalLevel1.style.display = "block";
+            }
+
             break;
             defualt: return;
         }
@@ -677,17 +629,6 @@ frame.on(
       return uniques;
     };
 
-    // The line cords are initially recieved as an array with objects.
-    // This function removes the objects and sets each point in an array. All the points are then stored in a
-    // higher level array, returning a two-dimensional array of the line cords.
-    const convertToArr = (lineCords) => {
-      let arr = [];
-      for (let i = 0; i < lineCords.length; i++) {
-        arr.push([Number(lineCords[i].x), Number(lineCords[i].y)]);
-      }
-
-      return arr;
-    };
 
     //A function that utilizes all utility functions and returns an array with the dots selected by the user
     const getSelectedPoints = (latticeDots, lineCords) => {
@@ -1015,17 +956,6 @@ frame.on(
         level6Xpos += level6Step;
         level6DotXpos -= 50;
       }
-
-      //     //   new Button({
-      //     //     label: "SUBMIT",
-      //     //   })
-      //     //     .loc(400, 600, level6)
-      //     //     .tap(async () => {
-      //     //       let sorted = level6SelectedDots.sort((a, b) => {
-      //     //         return a - b;
-      //     //       });
-      //     //       await submitAnswer(level, sorted);
-      // });
     }
     createLevel6Lattice();
 
@@ -2269,7 +2199,7 @@ frame.on(
       .tap(() => {
         if (playingCompleted) {
           drawBtn.backgroundColor === purple
-            ? (drawBtn.backgroundColor = orange)
+            ? (drawBtn.backgroundColor = "#F2D388")
             : (drawBtn.backgroundColor = purple);
           drawingEnabled = !drawingEnabled;
         }
@@ -2402,15 +2332,6 @@ frame.on(
       return text;
     };
 
-    // document.addEventListener("keydown", async (e) => {
-    //   if (e.key === "Enter") {
-    // drawingEnabled = false;
-    // const { index, option } = checkAllAnswers();
-    // modalTextContainer.textContent = await getTextLevel10(index, option);
-    // modalLevel1.style.display = "block";
-    //   }
-    // });
-
     const getCurrentMelody = () => {
       switch (currentNecklace) {
         case 1:
@@ -2501,7 +2422,7 @@ frame.on(
             currentNecklace++;
             await getNecklaceAnswers(currentNecklace);
             nextNecklace();
-            drawBtn.backgroundColor = orange;
+            drawBtn.backgroundColor = "#F2D388";
             stage.update();
           }
       }
