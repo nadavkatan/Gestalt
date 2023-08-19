@@ -115,17 +115,11 @@ frame.on(
       // await initializeGame();
       // initializeLocalStorage();
 
-      // let data = [
-      //   264, 266, 268, 270, 272, 274, 276, 278, 280, 282, 284, 286, 288, 290,
-      //   292, 294,
-      // ];
+      
 
+      // Use code bellow to update firebase when id's of canvas elements change due to ui modifications.
       // let data = [1092, 1094, 1096, 1098, 1100, 1102, 1104];
-      // let data = [
-      //   1078, 1080, 1082, 1084, 1086, 1088, 1090, 1092, 1094, 1096, 1098, 1100,
-      //   1102, 1104,
-      // ];
-      // await updateDocument("answers", "GgvZL1Dfnt3kPNTcFq0P", { points: data });
+       // await updateDocument("answers", "uIYo8V731ecHF2yZrxeD", { points: data });
     })();
 
     const getNecklaceAnswers = async (currentNecklace) => {
@@ -213,13 +207,11 @@ frame.on(
             Number(levelDocument.numAnswersSubmitted)) *
           100
         ).toFixed(2);
-
-        text = `${percentage}% of the users have reported to experience the same grouping intuition as you submitted. You goruping intuition confirms the Gestalt principle of ${principle}.`;
+        text = `${percentage}% of the users have reported to experience the same grouping intuition as you submitted. ${principle ? `Your goruping intuition confirms the <strong> Gestalt principle of ${principle}.</strong>` : ""}` 
       } else {
         console.log("else");
         text =
           "Your grouping intuition matches 0% of the previously submitted reports.";
-        // "Test";
       }
       return { text, index };
     };
@@ -227,7 +219,7 @@ frame.on(
     // When the user answers correctly, he gets explanations about his/her intuition. This function matches the explanations to the current level.
     const submitAnswer = async (level, selectedPoints) => {
       const { text, index } = await getResponseText(selectedPoints);
-      modalTextContainer.textContent = text;
+      modalTextContainer.innerHTML = text;
       modalLevel1.style.display = "block";
 
       if (submittedForLevel < level) {
@@ -410,7 +402,7 @@ frame.on(
     );
 
     let level10 = new Page(stageW, stageH, black).cur("grab");
-    level10.title = new Label({ text: "Level 10", color: white, italic: true }).loc(
+    level10.title = new Label({ text: "Level 10.1", color: white, italic: true }).loc(
       100,
       100,
       level10
@@ -2423,6 +2415,7 @@ frame.on(
             await getNecklaceAnswers(currentNecklace);
             nextNecklace();
             drawBtn.backgroundColor = "#F2D388";
+            level10.title.label.text = `Level 10.${currentNecklace}`
             stage.update();
           }
       }
