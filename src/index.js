@@ -99,11 +99,18 @@ frame.on(
         await initializeGame();
         initializeLocalStorage();
       }
-      modalInstructions.style.display = "block";
+      modalInstructions.classList.remove("modal-hide");
+      modalInstructions.classList.add("modal-in");
     });
 
     startLevel.addEventListener("click", () => {
-      modalInstructions.style.display = "none";
+      modalInstructions.classList.remove("modal-in");
+      modalInstructions.classList.add("modal-out");
+
+      setTimeout(()=>{
+        modalInstructions.classList.remove("modal-out");
+        modalInstructions.classList.add("modal-hide");
+      }, 1000)
       if(startLevel.textContent === "Try again"){
         removeDrawings()
         startLevel.textContent === "Start"
@@ -220,9 +227,11 @@ frame.on(
 
     // When the user answers correctly, he gets explanations about his/her intuition. This function matches the explanations to the current level.
     const submitAnswer = async (level, selectedPoints) => {
+      console.log("submit answer");
       const { text, index } = await getResponseText(selectedPoints);
       modalTextContainer.innerHTML = text;
-      modalLevel1.style.display = "block";
+      modalLevel1.classList.remove("modal-hide")
+      modalLevel1.classList.add("modal-in")
 
       if (submittedForLevel < level) {
         await updateLevelInfo();
@@ -555,7 +564,8 @@ frame.on(
               // User selected only one gorup when minimum is two
               modalInstructionsText.textContent = "You selected only one group. Try to select all the available groups that you perceive."
               startLevel.textContent = "Try again"
-              modalInstructions.style.display = "block";
+              modalInstructions.classList.remove("modal-hide");
+              modalInstructions.classList.add("modal-in");
               selectedGroups = []
               drawBtn.backgroundColor = "#F2D388"
             } else {
@@ -565,7 +575,8 @@ frame.on(
                 option, 
                 answer
               );
-              modalLevel1.style.display = "block";
+              modalLevel1.classList.remove("modal-hide");
+              modalLevel1.classList.add("modal-in");
             }
 
             break;
@@ -2364,13 +2375,20 @@ frame.on(
           modalInstructionsText.textContent =
             "Select a group that you perceive by clicking on the elements with the cursor. Submit you selection by pressing the 'Enter' key.";
         }
-        modalInstructions.style.display = "block";
+        modalInstructions.classList.remove("modal-hide");
+        modalInstructions.classList.add("modal-in");
+
       }, 1000);
     };
 
     //Move to the next level functionlity
     nextLevelBtn.addEventListener("click", async () => {
-        modalLevel1.style.display = "none";
+        modalLevel1.classList.remove("modal-in");
+        modalLevel1.classList.add("modal-out");
+        setTimeout(()=>{
+          modalLevel1.classList.remove("modal-out");
+          modalLevel1.classList.add("modal-hide");
+        }, 1000)
       switch (level) {
         case 1:
           await goToNextLevel(level2);

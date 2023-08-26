@@ -27,10 +27,56 @@
     animation: cursorAnim2 .7s infinite alternate;
 }
 
+
+
 .expand{
     animation: cursorAnim3 .5s forwards;
     border: 1px solid yellow;
     z-index: 10;
+}
+
+.modal-content {
+    box-shadow: -2px 4px 8px 0px lightslategray
+}
+
+.modal-in {
+    display: block;
+    animation: modalAnimIn .5s forwards;
+}
+
+.modal-out {
+    display: block;
+    animation: modalAnimOut .5s forwards;
+}
+
+.modal-hide {
+    display: none;
+    top: -300px
+}
+
+@keyframes modalAnimIn {
+    0% {
+        top: -300px
+    }
+    50%{
+        top: 30px
+    }
+
+    100% {
+        top: 0px
+    }
+}
+
+@keyframes modalAnimOut {
+    0% {
+        top: 0px
+    }
+    10%{
+        top: -30px
+    }
+    100%{
+        top: 1000px
+    }
 }
 
 @keyframes cursorAnim {
@@ -67,6 +113,7 @@
 
 #myCanvas{
     z-index: 0;
+    box-shadow: 0px 0px 10px 0px darkgray;
 }
 
 

@@ -38,6 +38,76 @@
   z-index: 10;
 }
 
+.modal-content {
+  -webkit-box-shadow: -2px 4px 8px 0px lightslategray;
+          box-shadow: -2px 4px 8px 0px lightslategray;
+}
+
+.modal-in {
+  display: block;
+  -webkit-animation: modalAnimIn .5s forwards;
+          animation: modalAnimIn .5s forwards;
+}
+
+.modal-out {
+  display: block;
+  -webkit-animation: modalAnimOut .5s forwards;
+          animation: modalAnimOut .5s forwards;
+}
+
+.modal-hide {
+  display: none;
+  top: -300px;
+}
+
+@-webkit-keyframes modalAnimIn {
+  0% {
+    top: -300px;
+  }
+  50% {
+    top: 30px;
+  }
+  100% {
+    top: 0px;
+  }
+}
+
+@keyframes modalAnimIn {
+  0% {
+    top: -300px;
+  }
+  50% {
+    top: 30px;
+  }
+  100% {
+    top: 0px;
+  }
+}
+
+@-webkit-keyframes modalAnimOut {
+  0% {
+    top: 0px;
+  }
+  10% {
+    top: -30px;
+  }
+  100% {
+    top: 1000px;
+  }
+}
+
+@keyframes modalAnimOut {
+  0% {
+    top: 0px;
+  }
+  10% {
+    top: -30px;
+  }
+  100% {
+    top: 1000px;
+  }
+}
+
 @-webkit-keyframes cursorAnim {
   from {
     -webkit-transform: scale(1);
@@ -116,6 +186,8 @@
 
 #myCanvas {
   z-index: 0;
+  -webkit-box-shadow: 0px 0px 10px 0px darkgray;
+          box-shadow: 0px 0px 10px 0px darkgray;
 }
 
 #level0 {
