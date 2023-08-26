@@ -118,11 +118,24 @@
 
 
 #level0{
-    height: 100vh;
     display: flex;
     justify-content:center;
-    align-items:center;
-    flex-direction: column;
+    .level0-container {
+        width: 1052px;
+        background-color: black;
+        height: 100vh;
+        box-shadow: 0px 0px 10px 0px darkgray;
+        .level0-content {
+            height: 100%;
+            display: flex;
+            justify-content:center;
+            align-items:center;
+            flex-direction: column;
+        }
+
+
+    }
+
 }
 
 iframe{

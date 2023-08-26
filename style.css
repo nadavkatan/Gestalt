@@ -191,7 +191,24 @@
 }
 
 #level0 {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+}
+
+#level0 .level0-container {
+  width: 1052px;
+  background-color: black;
   height: 100vh;
+  -webkit-box-shadow: 0px 0px 10px 0px darkgray;
+          box-shadow: 0px 0px 10px 0px darkgray;
+}
+
+#level0 .level0-container .level0-content {
+  height: 100%;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
