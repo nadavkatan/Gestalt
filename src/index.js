@@ -92,6 +92,8 @@ frame.on(
         pages.go(level10);
         necklacesDocuments = await getCollection("necklaces");
         await getNecklaceAnswers(1);
+      } else if (level === 10 && currentNecklace === 8){
+        // redirect to chapter 6 of the dissertation
       } else {
         level = 1;
         await initializeGame();
@@ -2368,9 +2370,7 @@ frame.on(
 
     //Move to the next level functionlity
     nextLevelBtn.addEventListener("click", async () => {
-      if (currentNecklace !== 8) {
         modalLevel1.style.display = "none";
-      }
       switch (level) {
         case 1:
           await goToNextLevel(level2);
@@ -2405,8 +2405,10 @@ frame.on(
           break;
         case 10:
           if (currentNecklace === 8) {
-            modalTextContainer.textContent =
-              "That is the end of the currently developed app. Next, will be a video that summarizes the auditory grouping principles and discussing the morotiraclly-imposed grouping principles. Following that video will be the motorically-imposed groupings part.";
+            zimCanvas.style.display = "none";
+            level0.style.display = "flex";
+            startBtn.textContent = "Go to chapter 6"
+            introVideo.src = "https://www.youtube.com/embed/HGaO7Ccs4q8";
           } else {
             selectedGroups = [];
             removeDrawings();

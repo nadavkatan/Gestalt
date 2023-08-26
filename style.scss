@@ -3,15 +3,6 @@
     padding: 0;
     box-sizing: border-box;
 }
-
-// .canvas-container{
-//     height: 100vh;
-
-// }
-// body{
-//     cursor: none;
-
-// }
 .cursor{
     width: 25px;
     height: 25px;
@@ -75,52 +66,9 @@
 
 
 #myCanvas{
-    // position: relative!important;
     z-index: 0;
 }
 
-// .vertical-buttons-container{
-//     display: flex;
-//     flex-direction: column;
-// }
-
-// .level-5-container{
-//     height: 100vh;
-//     .level-5-buttons-wrapper{
-//         #btn-container-1, #btn-container-3, #btn-container-5{
-//             transform: rotate(-45deg);
-//             // margin-right: -1em;
-//         }
-//         #btn-container-2, #btn-container-4{
-//             transform: rotate(45deg);
-
-//         }
-//     }
-// }
-
-// .level-6-container{
-//     height: 100vh;
-//     .circles-container{
-//     .circle{ 
-//         height: 3em;
-//         width: 9em;
-//         .dot{
-//             // background-color: red;
-//             height: 1em;
-//             width: 1em;
-//             border-radius: 20px;
-//             // margin: 0.5em;
-//         }
-//     }
-// }
-// }
-// .level-7-submit{
-// margin-top: 500px;
-// }
-
-// // .modal-level-1{
-// //     cursor: default;
-// // }
 
 #level0{
     height: 100vh;
