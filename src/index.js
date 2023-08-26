@@ -1,5 +1,14 @@
 import _ from "lodash";
-import { melody1, melody2, melody3, melody4, melody5, melody6, melody7, melody8 } from "./data/melodies";
+import {
+  melody1,
+  melody2,
+  melody3,
+  melody4,
+  melody5,
+  melody6,
+  melody7,
+  melody8,
+} from "./data/melodies";
 import {
   updateLevel,
   updateDocument,
@@ -7,7 +16,13 @@ import {
   getDocumentsByQuery,
   createDocument,
 } from "./utils/firestore";
-import { removeEmptyArrays, formatArrayTo1d, formatArrayTo2d, arrayEquals, convertToArr } from "./utils/helpers/helpers"
+import {
+  removeEmptyArrays,
+  formatArrayTo1d,
+  formatArrayTo2d,
+  arrayEquals,
+  convertToArr,
+} from "./utils/helpers/helpers";
 
 // import video2 from './assets/videosgestalt_intro.mp4'
 // === PART I === FUNDAMENTAL GESTALT PRINCIPLES === //
@@ -28,7 +43,7 @@ frame.on(
     // array to store the coordinates of the line drawn by the user
     let lineCords = [];
     //track the levels progress
-    let level = 1;
+    let level = 0;
     //Documents of levels collection from firebase
     let levelsDocuments = [];
     //Answers relevant for each level, fetched upon entering a level
@@ -70,7 +85,7 @@ frame.on(
     };
 
     const initializeLocalStorage = () => {
-       let storedProgress = JSON.parse(localStorage.getItem("gestaltGame"));
+      let storedProgress = JSON.parse(localStorage.getItem("gestaltGame"));
       if (!storedProgress) {
         localStorage.setItem(
           "gestaltGame",
@@ -82,38 +97,37 @@ frame.on(
     };
 
     startBtn.addEventListener("click", async () => {
-      zimCanvas.style.display = "block";
-      level0.style.display = "none";
-      introVideo.src = "";
-      if (level === 9.5) {
-        level = 10;
-        modalInstructionsText.textContent =
-          "Press the 'PLAY' button and listen carefully to the recording. Then, press the 'DRAW' button and use the cursor as a brush to circle ALL the groups that you perceive. Finally, submit your interpretation by pressing the 'ENTER' key.";
-        pages.go(level10);
-        necklacesDocuments = await getCollection("necklaces");
-        await getNecklaceAnswers(1);
-      } else if (level === 10 && currentNecklace === 8){
-        // redirect to chapter 6 of the dissertation
-      } else {
-        level = 1;
-        await initializeGame();
-        initializeLocalStorage();
+      if (level !== 10 && currentNecklace !== 8) {
+        zimCanvas.style.display = "block";
+        introVideo.src = "";
+        modalInstructions.classList.remove("modal-hide");
+        modalInstructions.classList.add("modal-in");
+        if (level === 0) {
+          level = 1;
+          await initializeGame();
+          initializeLocalStorage();
+        } else if (level === 9.5) {
+          level = 10;
+          modalInstructionsText.textContent =
+            "Press the 'PLAY' button and listen carefully to the recording. Then, press the 'DRAW' button and use the cursor as a brush to circle ALL the groups that you perceive. Finally, submit your interpretation by pressing the 'ENTER' key.";
+          pages.go(level10);
+          necklacesDocuments = await getCollection("necklaces");
+          await getNecklaceAnswers(1);
+        }
       }
-      modalInstructions.classList.remove("modal-hide");
-      modalInstructions.classList.add("modal-in");
     });
 
     startLevel.addEventListener("click", () => {
       modalInstructions.classList.remove("modal-in");
       modalInstructions.classList.add("modal-out");
 
-      setTimeout(()=>{
+      setTimeout(() => {
         modalInstructions.classList.remove("modal-out");
         modalInstructions.classList.add("modal-hide");
-      }, 1000)
-      if(startLevel.textContent === "Try again"){
-        removeDrawings()
-        startLevel.textContent === "Start"
+      }, 1000);
+      if (startLevel.textContent === "Try again") {
+        removeDrawings();
+        startLevel.textContent === "Start";
       }
     });
 
@@ -124,11 +138,9 @@ frame.on(
       // await initializeGame();
       // initializeLocalStorage();
 
-      
-
       // Use code bellow to update firebase when id's of canvas elements change due to ui modifications.
       // let data = [1092, 1094, 1096, 1098, 1100, 1102, 1104];
-       // await updateDocument("answers", "uIYo8V731ecHF2yZrxeD", { points: data });
+      // await updateDocument("answers", "uIYo8V731ecHF2yZrxeD", { points: data });
     })();
 
     const getNecklaceAnswers = async (currentNecklace) => {
@@ -167,7 +179,6 @@ frame.on(
     // === firebase functionality END === //
 
     // === Functionality of submitting, checking and responding to answers === //
-
 
     //Function that updates the answer and its common class answers in the db, or store a new answer if the user's
     // submission does not already exists in the db
@@ -216,9 +227,12 @@ frame.on(
             Number(levelDocument.numAnswersSubmitted)) *
           100
         ).toFixed(2);
-        text = `${percentage}% of the users have reported to experience the same grouping intuition as you submitted. ${principle ? `Your goruping intuition confirms the <strong> Gestalt principle of ${principle}.</strong>` : ""}` 
+        text = `${percentage}% of the users have reported to experience the same grouping intuition as you submitted. ${
+          principle
+            ? `Your goruping intuition confirms the <strong> Gestalt principle of ${principle}.</strong>`
+            : ""
+        }`;
       } else {
-        console.log("else");
         text =
           "Your grouping intuition matches 0% of the previously submitted reports.";
       }
@@ -227,11 +241,10 @@ frame.on(
 
     // When the user answers correctly, he gets explanations about his/her intuition. This function matches the explanations to the current level.
     const submitAnswer = async (level, selectedPoints) => {
-      console.log("submit answer");
       const { text, index } = await getResponseText(selectedPoints);
       modalTextContainer.innerHTML = text;
-      modalLevel1.classList.remove("modal-hide")
-      modalLevel1.classList.add("modal-in")
+      modalLevel1.classList.remove("modal-hide");
+      modalLevel1.classList.add("modal-in");
 
       if (submittedForLevel < level) {
         await updateLevelInfo();
@@ -266,172 +279,168 @@ frame.on(
     // === Create the level and corresponding ZIM PAGES === //
 
     let level1 = new Page(stageW, stageH, black).cur("none");
-    level1.title = new Label({ text: "Level 1", color: white, italic: true }).loc(
-      100,
-      100,
-      level1
-    );
-  
+    level1.title = new Label({
+      text: "Level 1",
+      color: white,
+      italic: true,
+    }).loc(100, 100, level1);
+
     const labelLevel1 = new Label({
-      text:"Redraw",
-      size:30,
-      italic:true,
-      color: black
-   });
+      text: "Redraw",
+      size: 30,
+      italic: true,
+      color: black,
+    });
     new Button({
       label: labelLevel1,
-      width:190,
-      height:60,
-      backgroundColor:"#F2D388",
-      rollBackgroundColor:"#DAC0A3",
-      borderRaius:8,
-      shadowColor:"grey",
+      width: 190,
+      height: 60,
+      backgroundColor: "#F2D388",
+      rollBackgroundColor: "#DAC0A3",
+      borderRaius: 8,
+      shadowColor: "grey",
     })
       .loc(750, 650, level1)
       .tap(() => {
         redraw();
       });
 
-
     let level2 = new Page(stageW, stageH, black).cur("none");
-    level2.title = new Label({ text: "Level 2", color: white, italic: true }).loc(
-      100,
-      100,
-      level2
-    );
+    level2.title = new Label({
+      text: "Level 2",
+      color: white,
+      italic: true,
+    }).loc(100, 100, level2);
 
     const labelLevel2 = new Label({
-      text:"Redraw",
-      size:30,
-      italic:true,
-      color: black
-   });
+      text: "Redraw",
+      size: 30,
+      italic: true,
+      color: black,
+    });
     new Button({
       label: labelLevel2,
-      width:190,
-      height:60,
-      backgroundColor:"#F2D388",
-      rollBackgroundColor:"#DAC0A3",
-      borderRaius:8,
-      shadowColor:"grey",
+      width: 190,
+      height: 60,
+      backgroundColor: "#F2D388",
+      rollBackgroundColor: "#DAC0A3",
+      borderRaius: 8,
+      shadowColor: "grey",
     })
       .loc(750, 650, level2)
       .tap(() => {
         redraw();
       });
 
-
     let level3 = new Page(stageW, stageH, black).cur("none");
-    level3.title = new Label({ text: "Level 3", color: white, italic: true }).loc(
-      100,
-      100,
-      level3
-    );
+    level3.title = new Label({
+      text: "Level 3",
+      color: white,
+      italic: true,
+    }).loc(100, 100, level3);
 
     const labelLevel3 = new Label({
-      text:"Redraw",
-      size:30,
-      italic:true,
-      color: black
-   });
+      text: "Redraw",
+      size: 30,
+      italic: true,
+      color: black,
+    });
     new Button({
       label: labelLevel3,
-      width:190,
-      height:60,
-      backgroundColor:"#F2D388",
-      rollBackgroundColor:"#DAC0A3",
-      borderRaius:8,
-      shadowColor:"grey",
+      width: 190,
+      height: 60,
+      backgroundColor: "#F2D388",
+      rollBackgroundColor: "#DAC0A3",
+      borderRaius: 8,
+      shadowColor: "grey",
     })
       .loc(750, 650, level3)
       .tap(() => {
         redraw();
       });
 
-
     let level4 = new Page(stageW, stageH, black).cur("none");
-    level4.title = new Label({ text: "Level 4", color: white, italic: true }).loc(
-      100,
-      100,
-      level4
-    );
+    level4.title = new Label({
+      text: "Level 4",
+      color: white,
+      italic: true,
+    }).loc(100, 100, level4);
 
     const labelLevel4 = new Label({
-      text:"Redraw",
-      size:30,
-      italic:true,
-      color: black
-   });
+      text: "Redraw",
+      size: 30,
+      italic: true,
+      color: black,
+    });
     new Button({
       label: labelLevel4,
-      width:190,
-      height:60,
-      backgroundColor:"#F2D388",
-      rollBackgroundColor:"#DAC0A3",
-      borderRaius:8,
-      shadowColor:"grey",
+      width: 190,
+      height: 60,
+      backgroundColor: "#F2D388",
+      rollBackgroundColor: "#DAC0A3",
+      borderRaius: 8,
+      shadowColor: "grey",
     })
       .loc(750, 650, level4)
       .tap(() => {
         redraw();
       });
 
-
     let level5 = new Page(stageW, stageH, black).cur("none");
-    level5.title = new Label({ text: "Level 5", color: white, italic: true }).loc(
-      100,
-      100,
-      level5
-    );
+    level5.title = new Label({
+      text: "Level 5",
+      color: white,
+      italic: true,
+    }).loc(100, 100, level5);
 
     let level6 = new Page(stageW, stageH, black).cur("none");
-    level6.title = new Label({ text: "Level 6", color: white, italic: true }).loc(
-      100,
-      100,
-      level6
-    );
+    level6.title = new Label({
+      text: "Level 6",
+      color: white,
+      italic: true,
+    }).loc(100, 100, level6);
 
     let level7 = new Page(stageW, stageH, black).cur("none");
-    level7.title = new Label({ text: "Level 7", color: white, italic: true }).loc(
-      100,
-      100,
-      level7
-    );
+    level7.title = new Label({
+      text: "Level 7",
+      color: white,
+      italic: true,
+    }).loc(100, 100, level7);
 
     let level8 = new Page(stageW, stageH, black).cur("none");
-    level8.title = new Label({ text: "Level 8", color: white, italic: true }).loc(
-      100,
-      100,
-      level8
-    );
+    level8.title = new Label({
+      text: "Level 8",
+      color: white,
+      italic: true,
+    }).loc(100, 100, level8);
 
     let level9 = new Page(stageW, stageH, black).cur("none");
-    level9.title = new Label({ text: "Level 9", color: white, italic: true }).loc(
-      100,
-      100,
-      level9
-    );
+    level9.title = new Label({
+      text: "Level 9",
+      color: white,
+      italic: true,
+    }).loc(100, 100, level9);
 
     let level10 = new Page(stageW, stageH, black).cur("grab");
-    level10.title = new Label({ text: "Level 10.1", color: white, italic: true }).loc(
-      100,
-      100,
-      level10
-    );
+    level10.title = new Label({
+      text: "Level 10.1",
+      color: white,
+      italic: true,
+    }).loc(100, 100, level10);
 
     let level11 = new Page(stageW, stageH, black).cur("grab");
-    level11.title = new Label({ text: "Level 11", color: white, italic: true  }).loc(
-      100,
-      100,
-      level11
-    );
+    level11.title = new Label({
+      text: "Level 11",
+      color: white,
+      italic: true,
+    }).loc(100, 100, level11);
 
     let level12 = new Page(stageW, stageH, black).cur("grab");
-    level12.title = new Label({ text: "Level 12", color: white, italic: true  }).loc(
-      100,
-      100,
-      level12
-    );
+    level12.title = new Label({
+      text: "Level 12",
+      color: white,
+      italic: true,
+    }).loc(100, 100, level12);
 
     level2.name = "level 2";
     level3.name = "level 3";
@@ -560,19 +569,20 @@ frame.on(
             break;
           case 10:
             drawingEnabled = false;
-            if(selectedGroups.length === 1){
+            if (selectedGroups.length === 1) {
               // User selected only one gorup when minimum is two
-              modalInstructionsText.textContent = "You selected only one group. Try to select all the available groups that you perceive."
-              startLevel.textContent = "Try again"
+              modalInstructionsText.textContent =
+                "You selected only one group. Try to select all the available groups that you perceive.";
+              startLevel.textContent = "Try again";
               modalInstructions.classList.remove("modal-hide");
               modalInstructions.classList.add("modal-in");
-              selectedGroups = []
-              drawBtn.backgroundColor = "#F2D388"
+              selectedGroups = [];
+              drawBtn.backgroundColor = "#F2D388";
             } else {
               const { index, option, answer } = checkAllAnswers();
               modalTextContainer.innerHTML = await getTextLevel10(
                 index,
-                option, 
+                option,
                 answer
               );
               modalLevel1.classList.remove("modal-hide");
@@ -634,7 +644,6 @@ frame.on(
       return uniques;
     };
 
-
     //A function that utilizes all utility functions and returns an array with the dots selected by the user
     const getSelectedPoints = (latticeDots, lineCords) => {
       let cords = convertToArr(lineCords);
@@ -683,7 +692,6 @@ frame.on(
         y1: initialValueY,
         y2: initialValueY + rows * step - 30,
       });
-
     }
     let dots = [];
     // lattice with circles
@@ -2034,7 +2042,6 @@ frame.on(
       radius: 250,
     }).loc(700, 400, level10);
 
-
     xPos = [450, 700, 950, 700];
     yPos = [400, 150, 400, 650];
     let melodyDots = [];
@@ -2130,19 +2137,19 @@ frame.on(
     };
 
     const playLabelLevel10 = new Label({
-      text:"Play",
-      size:30,
-      italic:true,
-      color: black
-   });
+      text: "Play",
+      size: 30,
+      italic: true,
+      color: black,
+    });
     let playBtnLevel10 = new Button({
       label: playLabelLevel10,
-      width:190,
-      height:60,
-      backgroundColor:"#4477CE",
-      rollBackgroundColor:"#1D5D9B",
-      borderRaius:8,
-      shadowColor:"grey",
+      width: 190,
+      height: 60,
+      backgroundColor: "#4477CE",
+      rollBackgroundColor: "#1D5D9B",
+      borderRaius: 8,
+      shadowColor: "grey",
     })
       .loc(150, 220, level10)
       .tap(() => {
@@ -2185,20 +2192,20 @@ frame.on(
         }
       });
 
-      const drawLabelLevel10 = new Label({
-        text:"Draw",
-        size:30,
-        italic:true,
-        color: black
-     });
+    const drawLabelLevel10 = new Label({
+      text: "Draw",
+      size: 30,
+      italic: true,
+      color: black,
+    });
     let drawBtn = new Button({
       label: drawLabelLevel10,
-      width:190,
-      height:60,
-      backgroundColor:"#F2D388",
-      rollBackgroundColor:"#DAC0A3",
-      borderRaius:8,
-      shadowColor:"grey",
+      width: 190,
+      height: 60,
+      backgroundColor: "#F2D388",
+      rollBackgroundColor: "#DAC0A3",
+      borderRaius: 8,
+      shadowColor: "grey",
     })
       .loc(150, 370, level10)
       .tap(() => {
@@ -2210,26 +2217,26 @@ frame.on(
         }
       });
 
-      const redrawLabelLevel10 = new Label({
-        text:"Redraw",
-        size:30,
-        italic:true,
-        color: black
-     });
-      new Button({
-        label: redrawLabelLevel10,
-        width:190,
-        height:60,
-        backgroundColor:"#F2D388",
-        rollBackgroundColor:"#DAC0A3",
-        borderRaius:8,
-        shadowColor:"grey",
-      })
-        .loc(150, 520, level10)
-        .tap(() => {
-          selectedGroups = [];
-          redraw();
-        });
+    const redrawLabelLevel10 = new Label({
+      text: "Redraw",
+      size: 30,
+      italic: true,
+      color: black,
+    });
+    new Button({
+      label: redrawLabelLevel10,
+      width: 190,
+      height: 60,
+      backgroundColor: "#F2D388",
+      rollBackgroundColor: "#DAC0A3",
+      borderRaius: 8,
+      shadowColor: "grey",
+    })
+      .loc(150, 520, level10)
+      .tap(() => {
+        selectedGroups = [];
+        redraw();
+      });
 
     const sort2dArr = (arr) => {
       arr.sort(sortFunction);
@@ -2246,17 +2253,17 @@ frame.on(
 
     let checkAnswer = (answer, possibleAnswer) => {
       let x = true;
-      const sortedAnswer = sort2dArr(answer)
+      const sortedAnswer = sort2dArr(answer);
       // check length of higher level array
       if (sortedAnswer.length !== possibleAnswer.length) {
         x = false;
-        return x
+        return x;
       }
       //check lengths of inner arrays
       for (let i = 0; i < sortedAnswer.length; i++) {
         if (sortedAnswer[i].length !== possibleAnswer[i].length) {
           x = false;
-          return x
+          return x;
         }
       }
 
@@ -2275,18 +2282,23 @@ frame.on(
     const checkAllAnswers = () => {
       let index;
       let relevantOption;
-      let answer // this answer is used when we do not find an existing possible answer
-      let selectedGroupsWithoutEmptyArray = removeEmptyArrays(selectedGroups)  //Remove empty subarrays
+      let answer; // this answer is used when we do not find an existing possible answer
+      let selectedGroupsWithoutEmptyArray = removeEmptyArrays(selectedGroups); //Remove empty subarrays
 
       for (let option = 0; option < necklaceAnswers.length; option++) {
-        if (checkAnswer(selectedGroupsWithoutEmptyArray, necklaceAnswers[option].points)) {
+        if (
+          checkAnswer(
+            selectedGroupsWithoutEmptyArray,
+            necklaceAnswers[option].points
+          )
+        ) {
           index = option;
           relevantOption = necklaceAnswers[option];
         }
       }
-      if(!index) {
+      if (!index) {
         // Index is underfined is the submitted answer does not match to any of the existing possible answers
-        answer = formatArrayTo1d(selectedGroupsWithoutEmptyArray)
+        answer = formatArrayTo1d(selectedGroupsWithoutEmptyArray);
       }
       return { index: index, option: relevantOption, answer: answer };
     };
@@ -2316,19 +2328,18 @@ frame.on(
 
         text = `${percentage}% of the users have reported to experience the same grouping intuition as you submitted. You goruping intuition confirms the <strong> Gestalt principle of ${principle}.</strong>`;
       } else {
-
-        if(answer.length && submittedForLevel < level){
-        // add document to database with new answer
-        const newAnswer = {
-          answerClass: null, 
-          necklace: currentNecklace,
-          points: answer,
-          principle: null, 
-          timesChosen: 1
-        }
-        await createDocument("level12Answers", newAnswer)
+        if (answer.length && submittedForLevel < level) {
+          // add document to database with new answer
+          const newAnswer = {
+            answerClass: null,
+            necklace: currentNecklace,
+            points: answer,
+            principle: null,
+            timesChosen: 1,
+          };
+          await createDocument("level12Answers", newAnswer);
         } else {
-          console.error("Couldn't save new answer'")
+          console.error("Couldn't save new answer'");
         }
 
         text =
@@ -2377,18 +2388,17 @@ frame.on(
         }
         modalInstructions.classList.remove("modal-hide");
         modalInstructions.classList.add("modal-in");
-
       }, 1000);
     };
 
     //Move to the next level functionlity
     nextLevelBtn.addEventListener("click", async () => {
-        modalLevel1.classList.remove("modal-in");
-        modalLevel1.classList.add("modal-out");
-        setTimeout(()=>{
-          modalLevel1.classList.remove("modal-out");
-          modalLevel1.classList.add("modal-hide");
-        }, 1000)
+      modalLevel1.classList.remove("modal-in");
+      modalLevel1.classList.add("modal-out");
+      setTimeout(() => {
+        modalLevel1.classList.remove("modal-out");
+        modalLevel1.classList.add("modal-hide");
+      }, 1000);
       switch (level) {
         case 1:
           await goToNextLevel(level2);
@@ -2425,7 +2435,7 @@ frame.on(
           if (currentNecklace === 8) {
             zimCanvas.style.display = "none";
             level0.style.display = "flex";
-            startBtn.textContent = "Go to chapter 6"
+            startBtn.textContent = "Go to chapter 6";
             introVideo.src = "https://www.youtube.com/embed/HGaO7Ccs4q8";
           } else {
             selectedGroups = [];
@@ -2435,7 +2445,7 @@ frame.on(
             await getNecklaceAnswers(currentNecklace);
             nextNecklace();
             drawBtn.backgroundColor = "#F2D388";
-            level10.title.label.text = `Level 10.${currentNecklace}`
+            level10.title.label.text = `Level 10.${currentNecklace}`;
             stage.update();
           }
       }

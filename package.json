@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/nadavkatan/Gestalt#readme",
   "devDependencies": {
+    "dotenv-webpack": "^8.0.1",
     "webpack": "^5.74.0",
     "webpack-cli": "^4.10.0"
   },

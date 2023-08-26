@@ -10,12 +10,12 @@ import { getStorage } from "firebase/storage";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyC2qeMbm_2K7yiG80veN8vsDLqOe02GJQ4",
-  authDomain: "gestalt-bfa32.firebaseapp.com",
-  projectId: "gestalt-bfa32",
-  storageBucket: "gestalt-bfa32.appspot.com",
-  messagingSenderId: "757074792003",
-  appId: "1:757074792003:web:1f8d60bb222e6652380ef6",
+  apiKey: process.env.FIREBASE_API_KEI,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_APP_ID,
 };
 
 // Initialize Firebase
