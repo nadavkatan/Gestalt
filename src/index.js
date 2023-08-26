@@ -560,7 +560,7 @@ frame.on(
               drawBtn.backgroundColor = "#F2D388"
             } else {
               const { index, option, answer } = checkAllAnswers();
-              modalTextContainer.textContent = await getTextLevel10(
+              modalTextContainer.innerHTML = await getTextLevel10(
                 index,
                 option, 
                 answer
@@ -2303,7 +2303,7 @@ frame.on(
           timesChosen: option.timesChosen + 1,
         });
 
-        text = `${percentage}% of the users have reported to experience the same grouping intuition as you submitted. You goruping intuition confirms the Gestalt principle of ${principle}.`;
+        text = `${percentage}% of the users have reported to experience the same grouping intuition as you submitted. You goruping intuition confirms the <strong> Gestalt principle of ${principle}.</strong>`;
       } else {
 
         if(answer.length && submittedForLevel < level){
