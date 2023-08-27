@@ -99,9 +99,14 @@ frame.on(
     startBtn.addEventListener("click", async () => {
       if (level !== 10 && currentNecklace !== 8) {
         zimCanvas.style.display = "block";
-        introVideo.src = "";
-        modalInstructions.classList.remove("modal-hide");
-        modalInstructions.classList.add("modal-in");
+        zimCanvas.classList.remove("canvas-out");
+        zimCanvas.classList.add("canvas-in");
+        setTimeout(() => {
+          introVideo.src = "";
+          modalInstructions.classList.remove("modal-hide");
+          modalInstructions.classList.add("modal-in");
+        }, 1000);
+
         if (level === 0) {
           level = 1;
           await initializeGame();
@@ -110,7 +115,6 @@ frame.on(
           level = 10;
           modalInstructionsText.textContent =
             "Press the 'PLAY' button and listen carefully to the recording. Then, press the 'DRAW' button and use the cursor as a brush to circle ALL the groups that you perceive. Finally, submit your interpretation by pressing the 'ENTER' key.";
-          pages.go(level10);
           necklacesDocuments = await getCollection("necklaces");
           await getNecklaceAnswers(1);
         }
@@ -133,6 +137,7 @@ frame.on(
 
     (async function () {
       zimCanvas.style.display = "none";
+      zimCanvas.style.opacity = 0;
       // level0.style.display = "none";
 
       // await initializeGame();
@@ -2427,13 +2432,22 @@ frame.on(
           break;
         case 9:
           level = 9.5;
-          zimCanvas.style.display = "none";
+          zimCanvas.classList.remove("canvas-in");
+          zimCanvas.classList.add("canvas-out");
+          setTimeout(() => {
+            zimCanvas.style.display = "none";
+            pages.go(level10);
+          }, 1000);
           level0.style.display = "flex";
           introVideo.src = "https://www.youtube.com/embed/vOO6-w-MrmA";
           break;
         case 10:
           if (currentNecklace === 8) {
-            zimCanvas.style.display = "none";
+            zimCanvas.classList.remove("canvas-in");
+            zimCanvas.classList.add("canvas-out");
+            setTimeout(() => {
+              zimCanvas.style.display = "none";
+            }, 1000);
             level0.style.display = "flex";
             startBtn.textContent = "Go to chapter 6";
             introVideo.src = "https://www.youtube.com/embed/HGaO7Ccs4q8";

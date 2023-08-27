@@ -12,8 +12,8 @@
   border-radius: 50%;
   position: absolute;
   z-index: 10;
-  -webkit-animation: cursorAnim .7s infinite alternate;
-          animation: cursorAnim .7s infinite alternate;
+  -webkit-animation: cursorAnim 0.7s infinite alternate;
+          animation: cursorAnim 0.7s infinite alternate;
   pointer-events: none;
 }
 
@@ -26,14 +26,14 @@
   top: -8.8px;
   left: -8.8px;
   border-radius: 50%;
-  opacity: .5;
-  -webkit-animation: cursorAnim2 .7s infinite alternate;
-          animation: cursorAnim2 .7s infinite alternate;
+  opacity: 0.5;
+  -webkit-animation: cursorAnim2 0.7s infinite alternate;
+          animation: cursorAnim2 0.7s infinite alternate;
 }
 
 .expand {
-  -webkit-animation: cursorAnim3 .5s forwards;
-          animation: cursorAnim3 .5s forwards;
+  -webkit-animation: cursorAnim3 0.5s forwards;
+          animation: cursorAnim3 0.5s forwards;
   border: 1px solid yellow;
   z-index: 10;
 }
@@ -45,19 +45,29 @@
 
 .modal-in {
   display: block;
-  -webkit-animation: modalAnimIn .5s forwards;
-          animation: modalAnimIn .5s forwards;
+  -webkit-animation: modalAnimIn 0.5s forwards;
+          animation: modalAnimIn 0.5s forwards;
 }
 
 .modal-out {
   display: block;
-  -webkit-animation: modalAnimOut .5s forwards;
-          animation: modalAnimOut .5s forwards;
+  -webkit-animation: modalAnimOut 0.5s forwards;
+          animation: modalAnimOut 0.5s forwards;
 }
 
 .modal-hide {
   display: none;
   top: -300px;
+}
+
+.canvas-in {
+  -webkit-animation: canvasAnimIn 1s forwards;
+          animation: canvasAnimIn 1s forwards;
+}
+
+.canvas-out {
+  -webkit-animation: canvasAnimOut 1s forwards;
+          animation: canvasAnimOut 1s forwards;
 }
 
 @-webkit-keyframes modalAnimIn {
@@ -83,7 +93,6 @@
     top: 0px;
   }
 }
-
 @-webkit-keyframes modalAnimOut {
   0% {
     top: 0px;
@@ -95,7 +104,6 @@
     top: 1000px;
   }
 }
-
 @keyframes modalAnimOut {
   0% {
     top: 0px;
@@ -107,7 +115,38 @@
     top: 1000px;
   }
 }
-
+@-webkit-keyframes canvasAnimIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes canvasAnimIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@-webkit-keyframes canvasAnimOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes canvasAnimOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
 @-webkit-keyframes cursorAnim {
   from {
     -webkit-transform: scale(1);
@@ -118,7 +157,6 @@
             transform: scale(0.7);
   }
 }
-
 @keyframes cursorAnim {
   from {
     -webkit-transform: scale(1);
@@ -129,7 +167,6 @@
             transform: scale(0.7);
   }
 }
-
 @-webkit-keyframes cursorAnim2 {
   from {
     -webkit-transform: scale(1);
@@ -140,7 +177,6 @@
             transform: scale(0.4);
   }
 }
-
 @keyframes cursorAnim2 {
   from {
     -webkit-transform: scale(1);
@@ -151,7 +187,6 @@
             transform: scale(0.4);
   }
 }
-
 @-webkit-keyframes cursorAnim3 {
   0% {
     -webkit-transform: scale(1);
@@ -167,7 +202,6 @@
     opacity: 0;
   }
 }
-
 @keyframes cursorAnim3 {
   0% {
     -webkit-transform: scale(1);
@@ -183,7 +217,6 @@
     opacity: 0;
   }
 }
-
 #myCanvas {
   z-index: 0;
   -webkit-box-shadow: 0px 0px 10px 0px darkgray;
@@ -198,7 +231,6 @@
       -ms-flex-pack: center;
           justify-content: center;
 }
-
 #level0 .level0-container {
   width: 1052px;
   background-color: black;
@@ -206,7 +238,6 @@
   -webkit-box-shadow: 0px 0px 10px 0px darkgray;
           box-shadow: 0px 0px 10px 0px darkgray;
 }
-
 #level0 .level0-container .level0-content {
   height: 100%;
   display: -webkit-box;
