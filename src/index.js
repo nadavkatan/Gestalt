@@ -1,4 +1,5 @@
 import _ from "lodash";
+import "../style.css";
 import {
   melody1,
   melody2,
