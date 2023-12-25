@@ -107,6 +107,29 @@ frame.on(
       }
     };
 
+    const getCurrentDateAndTime = () => {
+      // Create a new Date object, which represents the current date and time
+      const currentDateAndTime = new Date();
+
+      // Extract components of the date and time
+      const year = currentDateAndTime.getFullYear();
+      const month = currentDateAndTime.getMonth() + 1; // Month is zero-based, so add 1
+      const day = currentDateAndTime.getDate();
+      const hours = currentDateAndTime.getHours();
+      const minutes = currentDateAndTime.getMinutes();
+      const seconds = currentDateAndTime.getSeconds();
+
+      // Create a formatted string (you can customize this format)
+      const formattedDateTime = `${day}/${month}.${year} ${
+        hours.toString().length === 1 ? `0${hours}` : hours
+      }:${minutes.toString().length === 1 ? `0${minutes}` : minutes}:${
+        seconds.toString().length === 1 ? `0${seconds}` : seconds
+      }`;
+
+      // Display the result
+      return formattedDateTime;
+    };
+
     startBtn.addEventListener("click", async () => {
       if (level !== 10 && currentNecklace !== 8) {
         zimCanvas.style.display = "block";
@@ -180,29 +203,6 @@ frame.on(
       await updateDocument("levels", relevantLevelDocument.id, {
         numAnswersSubmitted: relevantLevelDocument.numAnswersSubmitted + 1,
       });
-    };
-
-    const getCurrentDateAndTime = () => {
-      // Create a new Date object, which represents the current date and time
-      const currentDateAndTime = new Date();
-
-      // Extract components of the date and time
-      const year = currentDateAndTime.getFullYear();
-      const month = currentDateAndTime.getMonth() + 1; // Month is zero-based, so add 1
-      const day = currentDateAndTime.getDate();
-      const hours = currentDateAndTime.getHours();
-      const minutes = currentDateAndTime.getMinutes();
-      const seconds = currentDateAndTime.getSeconds();
-
-      // Create a formatted string (you can customize this format)
-      const formattedDateTime = `${day}/${month}.${year} ${
-        hours.toString().length === 1 ? `0${hours}` : hours
-      }:${minutes.toString().length === 1 ? `0${minutes}` : minutes}:${
-        seconds.toString().length === 1 ? `0${seconds}` : seconds
-      }`;
-
-      // Display the result
-      return formattedDateTime;
     };
 
     const storeNewAnswer = async (points) => {
@@ -300,7 +300,10 @@ frame.on(
         submittedForLevel++;
         localStorage.setItem(
           "gestaltGame",
-          JSON.stringify({ answersSubmittedForLevels: submittedForLevel })
+          JSON.stringify({
+            answersSubmittedForLevels: submittedForLevel,
+            answersSubmittedForNecklace: submittedForNecklace,
+          })
         );
       }
     };
@@ -2371,8 +2374,16 @@ frame.on(
           await updateDocument("level12Answers", option.id, {
             timesChosen: option.timesChosen + 1,
           });
-        }
 
+          submittedForNecklace++;
+          localStorage.setItem(
+            "gestaltGame",
+            JSON.stringify({
+              answersSubmittedForLevels: submittedForLevel,
+              answersSubmittedForNecklace: submittedForNecklace,
+            })
+          );
+        }
         text = `${percentage}% of the users have reported to experience the same grouping intuition as you submitted. You goruping intuition confirms the <strong> Gestalt principle of ${principle}.</strong>`;
       } else {
         if (answer.length && submittedForLevel < level) {
@@ -2383,8 +2394,17 @@ frame.on(
             points: answer,
             principle: null,
             timesChosen: 1,
+            submittedAt: getCurrentDateAndTime(),
           };
           await createDocument("level12Answers", newAnswer);
+          submittedForNecklace++;
+          localStorage.setItem(
+            "gestaltGame",
+            JSON.stringify({
+              answersSubmittedForLevels: submittedForLevel,
+              answersSubmittedForNecklace: submittedForNecklace,
+            })
+          );
         } else {
           console.error("Couldn't save new answer'");
         }
