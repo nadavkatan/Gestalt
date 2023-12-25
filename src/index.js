@@ -2384,7 +2384,11 @@ frame.on(
             })
           );
         }
-        text = `${percentage}% of the users have reported to experience the same grouping intuition as you submitted. You goruping intuition confirms the <strong> Gestalt principle of ${principle}.</strong>`;
+        text = `${percentage}% of the users have reported to experience the same grouping intuition as you submitted. ${
+          principle
+            ? `You goruping intuition confirms the <strong> Gestalt principle of ${principle}.</strong>`
+            : ""
+        } `;
       } else {
         if (answer.length && submittedForLevel < level) {
           // add document to database with new answer
