@@ -59,8 +59,12 @@ frame.on(
     let selectedGroups = [];
     //Store a number representing the last level for which the user have sumbitted answers
     let submittedForLevel = 0;
+    //Store a number representing the last necklace for which the user have sumbitted answers
+    let submittedForNecklace = 0;
     // Store boolean representing whether the user have already submitted answers
     let submitted = submittedForLevel < level;
+    // Bolean value to allow user to try to submit their answer again
+    let allowTryAgain = false;
 
     //get dom elements
     const modalLevel1 = document.querySelector(".modal-level-1");
@@ -90,10 +94,16 @@ frame.on(
       if (!storedProgress) {
         localStorage.setItem(
           "gestaltGame",
-          JSON.stringify({ answersSubmittedForLevels: 0 })
+          JSON.stringify({
+            answersSubmittedForLevels: 0,
+            answersSubmittedForNecklace: 0,
+          })
         );
       } else {
         submittedForLevel = storedProgress.answersSubmittedForLevels;
+        submittedForNecklace = storedProgress.answersSubmittedForNecklace
+          ? storedProgress.answersSubmittedForNecklace
+          : 0;
       }
     };
 
@@ -172,12 +182,36 @@ frame.on(
       });
     };
 
+    const getCurrentDateAndTime = () => {
+      // Create a new Date object, which represents the current date and time
+      const currentDateAndTime = new Date();
+
+      // Extract components of the date and time
+      const year = currentDateAndTime.getFullYear();
+      const month = currentDateAndTime.getMonth() + 1; // Month is zero-based, so add 1
+      const day = currentDateAndTime.getDate();
+      const hours = currentDateAndTime.getHours();
+      const minutes = currentDateAndTime.getMinutes();
+      const seconds = currentDateAndTime.getSeconds();
+
+      // Create a formatted string (you can customize this format)
+      const formattedDateTime = `${day}/${month}.${year} ${
+        hours.toString().length === 1 ? `0${hours}` : hours
+      }:${minutes.toString().length === 1 ? `0${minutes}` : minutes}:${
+        seconds.toString().length === 1 ? `0${seconds}` : seconds
+      }`;
+
+      // Display the result
+      return formattedDateTime;
+    };
+
     const storeNewAnswer = async (points) => {
       const data = {
         level: level,
         points: points,
         timesChosen: 1,
         answerClass: Math.floor(Math.random() * 1000000000).toString(),
+        submittedAt: getCurrentDateAndTime(),
       };
       await createDocument("answers", data);
     };
@@ -198,7 +232,7 @@ frame.on(
             timesChosen: relevantAnswers[index].timesChosen + 1,
           });
         }
-      } else {
+      } else if (selectedPoints !== undefined && selectedPoints.length) {
         storeNewAnswer(selectedPoints);
       }
     };
@@ -220,7 +254,8 @@ frame.on(
       // Check that a selection has been made
       if (!selectedPoints.length) {
         text = "You have not selected any point. Try again";
-        return text;
+        allowTryAgain = true;
+        return { text };
       }
       index = compSelectionWithAnswers(selectedPoints);
       if (index !== undefined) {
@@ -248,11 +283,16 @@ frame.on(
     // When the user answers correctly, he gets explanations about his/her intuition. This function matches the explanations to the current level.
     const submitAnswer = async (level, selectedPoints) => {
       const { text, index } = await getResponseText(selectedPoints);
-      modalTextContainer.innerHTML = text;
+      modalTextContainer.innerHTML = text
+        ? text
+        : "Your grouping intuition matches 0% of the previously submitted reports.";
+
+      nextLevelBtn.innerHTML = allowTryAgain ? "Try Again" : "Next level";
+
       modalLevel1.classList.remove("modal-hide");
       modalLevel1.classList.add("modal-in");
 
-      if (submittedForLevel < level) {
+      if (submittedForLevel < level && !allowTryAgain) {
         await updateLevelInfo();
         await updateAnswersInfo(index, selectedPoints);
 
@@ -596,7 +636,6 @@ frame.on(
             }
 
             break;
-            defualt: return;
         }
       }
     });
@@ -2303,7 +2342,7 @@ frame.on(
         }
       }
       if (!index) {
-        // Index is underfined is the submitted answer does not match to any of the existing possible answers
+        // Index is undefined if the submitted answer does not match to any of the existing possible answers
         answer = formatArrayTo1d(selectedGroupsWithoutEmptyArray);
       }
       return { index: index, option: relevantOption, answer: answer };
@@ -2320,17 +2359,19 @@ frame.on(
         ).toFixed(2);
 
         //update database
-        await updateDocument(
-          "necklaces",
-          necklacesDocuments[currentNecklace - 1].id,
-          {
-            numAnswersSubmitted:
-              necklacesDocuments[currentNecklace - 1].numAnswersSubmitted + 1,
-          }
-        );
-        await updateDocument("level12Answers", option.id, {
-          timesChosen: option.timesChosen + 1,
-        });
+        if (submittedForNecklace < currentNecklace) {
+          await updateDocument(
+            "necklaces",
+            necklacesDocuments[currentNecklace - 1].id,
+            {
+              numAnswersSubmitted:
+                necklacesDocuments[currentNecklace - 1].numAnswersSubmitted + 1,
+            }
+          );
+          await updateDocument("level12Answers", option.id, {
+            timesChosen: option.timesChosen + 1,
+          });
+        }
 
         text = `${percentage}% of the users have reported to experience the same grouping intuition as you submitted. You goruping intuition confirms the <strong> Gestalt principle of ${principle}.</strong>`;
       } else {
@@ -2381,11 +2422,16 @@ frame.on(
 
     const goToNextLevel = async (nextLevel) => {
       pages.go(nextLevel);
-      if (level < 5) {
-        shape.removeFrom(stage);
-        stage.update();
+      shape.removeFrom(stage);
+      stage.update();
+
+      // Fallback in case level somehow became undefined
+      if (level === undefined) {
+        const nextLevelNumber = parseInt(nextLevel?.name?.match(/\d+/)[0], 10);
+        level = nextLevelNumber;
+      } else {
+        level++;
       }
-      level++;
       relevantAnswers = await getDocumentsByQuery("answers", "level", level);
       setTimeout(() => {
         if (level === 5) {
@@ -2405,64 +2451,71 @@ frame.on(
         modalLevel1.classList.remove("modal-out");
         modalLevel1.classList.add("modal-hide");
       }, 1000);
-      switch (level) {
-        case 1:
-          await goToNextLevel(level2);
-          break;
-        case 2:
-          await goToNextLevel(level3);
-          break;
-        case 3:
-          await goToNextLevel(level4);
-          break;
-        case 4:
-          await goToNextLevel(level5);
-          break;
-        case 5:
-          await goToNextLevel(level6);
-          break;
-        case 6:
-          await goToNextLevel(level7);
-          break;
-        case 7:
-          selectedSquiggles = [];
-          await goToNextLevel(level8);
-          break;
-        case 8:
-          await goToNextLevel(level9);
-          break;
-        case 9:
-          level = 9.5;
-          zimCanvas.classList.remove("canvas-in");
-          zimCanvas.classList.add("canvas-out");
-          setTimeout(() => {
-            zimCanvas.style.display = "none";
-            pages.go(level10);
-          }, 1000);
-          level0.style.display = "flex";
-          introVideo.src = "https://www.youtube.com/embed/vOO6-w-MrmA";
-          break;
-        case 10:
-          if (currentNecklace === 8) {
+
+      if (allowTryAgain) {
+        shape.removeFrom(stage);
+        stage.update();
+        allowTryAgain = false;
+      } else {
+        switch (level) {
+          case 1:
+            await goToNextLevel(level2);
+            break;
+          case 2:
+            await goToNextLevel(level3);
+            break;
+          case 3:
+            await goToNextLevel(level4);
+            break;
+          case 4:
+            await goToNextLevel(level5);
+            break;
+          case 5:
+            await goToNextLevel(level6);
+            break;
+          case 6:
+            await goToNextLevel(level7);
+            break;
+          case 7:
+            selectedSquiggles = [];
+            await goToNextLevel(level8);
+            break;
+          case 8:
+            await goToNextLevel(level9);
+            break;
+          case 9:
+            level = 9.5;
             zimCanvas.classList.remove("canvas-in");
             zimCanvas.classList.add("canvas-out");
             setTimeout(() => {
               zimCanvas.style.display = "none";
+              pages.go(level10);
             }, 1000);
             level0.style.display = "flex";
-            startBtn.innerHTML = `<a href="https://informed-phrasing.netlify.app/chapter/6" style="text-decoration: none; color: black;">Go to chapter 6</a>`;
-            introVideo.src = "https://www.youtube.com/embed/HGaO7Ccs4q8";
-          } else {
-            selectedGroups = [];
-            removeDrawings();
-            removeDots();
-            currentNecklace++;
-            await getNecklaceAnswers(currentNecklace);
-            nextNecklace();
-            drawBtn.backgroundColor = "#F2D388";
-            level10.title.label.text = `Level 10.${currentNecklace}`;
-            stage.update();
-          }
+            introVideo.src = "https://www.youtube.com/embed/vOO6-w-MrmA";
+            break;
+          case 10:
+            if (currentNecklace === 8) {
+              zimCanvas.classList.remove("canvas-in");
+              zimCanvas.classList.add("canvas-out");
+              setTimeout(() => {
+                zimCanvas.style.display = "none";
+              }, 1000);
+              level0.style.display = "flex";
+              startBtn.innerHTML = `<a href="https://informed-phrasing.netlify.app/chapter/6" style="text-decoration: none; color: black;">Go to chapter 6</a>`;
+              introVideo.src = "https://www.youtube.com/embed/HGaO7Ccs4q8";
+            } else {
+              selectedGroups = [];
+              removeDrawings();
+              removeDots();
+              currentNecklace++;
+              await getNecklaceAnswers(currentNecklace);
+              nextNecklace();
+              drawBtn.backgroundColor = "#F2D388";
+              level10.title.label.text = `Level 10.${currentNecklace}`;
+              stage.update();
+            }
+        }
       }
     });
     stage.update();
