@@ -477,19 +477,19 @@ frame.on(
       italic: true,
     }).loc(100, 100, level10);
 
-    let level11 = new Page(stageW, stageH, black).cur("grab");
-    level11.title = new Label({
-      text: "Level 11",
-      color: white,
-      italic: true,
-    }).loc(100, 100, level11);
+    // let level11 = new Page(stageW, stageH, black).cur("grab");
+    // level11.title = new Label({
+    //   text: "Level 11",
+    //   color: white,
+    //   italic: true,
+    // }).loc(100, 100, level11);
 
-    let level12 = new Page(stageW, stageH, black).cur("grab");
-    level12.title = new Label({
-      text: "Level 12",
-      color: white,
-      italic: true,
-    }).loc(100, 100, level12);
+    // let level12 = new Page(stageW, stageH, black).cur("grab");
+    // level12.title = new Label({
+    //   text: "Level 12",
+    //   color: white,
+    //   italic: true,
+    // }).loc(100, 100, level12);
 
     level2.name = "level 2";
     level3.name = "level 3";
@@ -500,8 +500,8 @@ frame.on(
     level8.name = "level 8";
     level9.name = "level 9";
     level10.name = "level 10";
-    level11.name = "level 11";
-    level12.name = "level 12";
+    // level11.name = "level 11";
+    // level12.name = "level 12";
 
     let pages = new Pages({
       pages: [
@@ -515,8 +515,8 @@ frame.on(
         { page: level8 },
         { page: level9 },
         { page: level10 },
-        { page: level11 },
-        { page: level12 },
+        // { page: level11 },
+        // { page: level12 },
       ],
       transition: "slide",
       speed: 1,
@@ -1231,54 +1231,54 @@ frame.on(
     // === LEVEL 11 COMPOSE === //
 
     //create stave:
-    new Line({ length: 1300, color: white }).loc(50, 300, level11);
-    new Line({ length: 1300, color: white }).loc(50, 350, level11);
-    new Line({ length: 1300, color: white }).loc(50, 400, level11);
-    new Line({ length: 1300, color: white }).loc(50, 450, level11);
-    new Line({ length: 1300, color: white }).loc(50, 500, level11);
+    // new Line({ length: 1300, color: white }).loc(50, 300, level11);
+    // new Line({ length: 1300, color: white }).loc(50, 350, level11);
+    // new Line({ length: 1300, color: white }).loc(50, 400, level11);
+    // new Line({ length: 1300, color: white }).loc(50, 450, level11);
+    // new Line({ length: 1300, color: white }).loc(50, 500, level11);
 
     // the clef is a custome made squggle with the following points:
-    let clefPoints = [
-      [116.4, 157.9, 0, 0, -39.9, -39.6, 39.9, 39.6],
-      [120.6, -130, 0, 0, -24.3, -5.8, 13.9, 3.3],
-      [103.6, -12.7, 0, 0, 49.8, -38.1, -20.7, 15.9],
-      [73.4, 33.6, 0, 0, 3.4, -14.1, -2.4, 10.1, "straight"],
-      [88.6, 74.5, 0, 0, -12, -8.2, 43.1, 29.4, "straight"],
-      [184.2, 24.5, 0, 0, 5.8, 54.5, -5.8, -54.5],
-      [120.7, 40.3, 0, 0, -33.1, -26.7, 42.8, 34.5, "straight"],
-    ];
+    // let clefPoints = [
+    //   [116.4, 157.9, 0, 0, -39.9, -39.6, 39.9, 39.6],
+    //   [120.6, -130, 0, 0, -24.3, -5.8, 13.9, 3.3],
+    //   [103.6, -12.7, 0, 0, 49.8, -38.1, -20.7, 15.9],
+    //   [73.4, 33.6, 0, 0, 3.4, -14.1, -2.4, 10.1, "straight"],
+    //   [88.6, 74.5, 0, 0, -12, -8.2, 43.1, 29.4, "straight"],
+    //   [184.2, 24.5, 0, 0, 5.8, 54.5, -5.8, -54.5],
+    //   [120.7, 40.3, 0, 0, -33.1, -26.7, 42.8, 34.5, "straight"],
+    // ];
 
     // create a trebble clef for the stave, using the above points
-    let clef = new Squiggle({
-      points: clefPoints,
-      color: orange,
-      interactive: false,
-    }).loc(-10, 410, level11);
+    // let clef = new Squiggle({
+    //   points: clefPoints,
+    //   color: orange,
+    //   interactive: false,
+    // }).loc(-10, 410, level11);
 
-    let circles;
+    // let circles;
 
-    let playBtn = new Button({
-      label: "PLAY",
-    })
-      .loc(430, 600, level11)
-      .tap(function () {
-        console.log(`x: ${note.dragMouseX}, y: ${note.dragMouseY}`);
-        circles =
-          //The ZIM page element has default children. The notes added by the user will be children of the page starting from the 10th index.
-          // filter out the children that are not notes added by the user
-          level11.children
-            .filter((child, index) => index >= 11)
-            //map through these notes and return their coordinates
-            .map((child) => {
-              return { x: child.x.toFixed(), y: child.y.toFixed() };
-            })
-            // sort them from lowest x value to higher, as melody is played from left to right
-            .sort((a, b) => {
-              return a.x - b.x;
-            });
-        // Play back the sorted melody
-        playMelody(circles);
-      });
+    // let playBtn = new Button({
+    //   label: "PLAY",
+    // })
+    //   .loc(430, 600, level11)
+    //   .tap(function () {
+    //     console.log(`x: ${note.dragMouseX}, y: ${note.dragMouseY}`);
+    //     circles =
+    //       //The ZIM page element has default children. The notes added by the user will be children of the page starting from the 10th index.
+    //       // filter out the children that are not notes added by the user
+    //       level11.children
+    //         .filter((child, index) => index >= 11)
+    //         //map through these notes and return their coordinates
+    //         .map((child) => {
+    //           return { x: child.x.toFixed(), y: child.y.toFixed() };
+    //         })
+    //         // sort them from lowest x value to higher, as melody is played from left to right
+    //         .sort((a, b) => {
+    //           return a.x - b.x;
+    //         });
+    //     // Play back the sorted melody
+    //     playMelody(circles);
+    //   });
 
     function playMelody(notes) {
       let counter = 0;
@@ -1383,43 +1383,43 @@ frame.on(
       }
     }
 
-    new Button({
-      label: "Check",
-    })
-      .loc(800, 700, level11)
-      .tap(function () {
-        checkPitchProx(circles);
-        checkTimeProx(circles);
-      });
+    // new Button({
+    //   label: "Check",
+    // })
+    //   .loc(800, 700, level11)
+    //   .tap(function () {
+    //     checkPitchProx(circles);
+    //     checkTimeProx(circles);
+    //   });
 
-    // let focusedNote;
-    let newNote;
-    let addNote = new Button({
-      label: "ADD NOTE",
-    })
-      .loc(800, 600, level11)
-      .tap(function () {
-        newNote = new Circle({
-          color: yellow,
-          radius: 15,
-        })
-          .loc(800, 550, level11)
-          .drag();
-        stage.update();
-      });
+    // // let focusedNote;
+    // let newNote;
+    // let addNote = new Button({
+    //   label: "ADD NOTE",
+    // })
+    //   .loc(800, 600, level11)
+    //   .tap(function () {
+    //     newNote = new Circle({
+    //       color: yellow,
+    //       radius: 15,
+    //     })
+    //       .loc(800, 550, level11)
+    //       .drag();
+    //     stage.update();
+    //   });
 
-    let note = new Circle({
-      color: yellow,
-      radius: 15,
-      // interactive: false,
-    })
-      .loc(100, 100, level11)
-      .drag();
+    // let note = new Circle({
+    //   color: yellow,
+    //   radius: 15,
+    //   // interactive: false,
+    // })
+    //   .loc(100, 100, level11)
+    //   .drag();
 
-    note.on("dblclick", () => {
-      note.removeFrom(level11);
-      stage.update();
-    });
+    // note.on("dblclick", () => {
+    //   note.removeFrom(level11);
+    //   stage.update();
+    // });
 
     // === LEVEL 12 ANIMATION GAME === //
     let gestaltPrinciples = ["proximity", "similarity", "continuity"];
@@ -2014,63 +2014,63 @@ frame.on(
       });
     };
 
-    let createLevel11Lattice = () => {
-      for (let column = 0; column < columns.length; column++) {
-        for (let row = 0; row < rows.length; row++) {
-          let element = new Blob({
-            points: blobPoints,
-            interactive: false,
-          }).loc(columns[column], rows[row], level12);
-          elements.push(element);
-        }
-      }
+    // let createLevel11Lattice = () => {
+    //   for (let column = 0; column < columns.length; column++) {
+    //     for (let row = 0; row < rows.length; row++) {
+    //       let element = new Blob({
+    //         points: blobPoints,
+    //         interactive: false,
+    //       }).loc(columns[column], rows[row], level12);
+    //       elements.push(element);
+    //     }
+    //   }
 
-      let btn = new Button({
-        label: "Start",
-      })
-        .loc(100, 200, level12)
-        .tap(() => {
-          animate();
-        });
-    };
+    //   let btn = new Button({
+    //     label: "Start",
+    //   })
+    //     .loc(100, 200, level12)
+    //     .tap(() => {
+    //       animate();
+    //     });
+    // };
 
-    let proximityBtn = new Button({
-      label: "Proximity",
-    })
-      .loc(100, 600, level12)
-      .tap(() => {
-        animate();
-      });
-    let similarityBtn = new Button({
-      label: "Similarity",
-    })
-      .loc(100, 400, level12)
-      .tap(() => {
-        animate();
-      });
-    let continuityBtn = new Button({
-      label: "Continuity",
-    })
-      .loc(1100, 600, level12)
-      .tap(() => {
-        animate();
-      });
-    let commonFateBtn = new Button({
-      label: "Common fate",
-    })
-      .loc(1100, 400, level12)
-      .tap(() => {
-        animate();
-      });
-    let commonRegionBtn = new Button({
-      label: "Common region",
-    })
-      .loc(1100, 200, level12)
-      .tap(() => {
-        animate();
-      });
+    // let proximityBtn = new Button({
+    //   label: "Proximity",
+    // })
+    //   .loc(100, 600, level12)
+    //   .tap(() => {
+    //     animate();
+    //   });
+    // let similarityBtn = new Button({
+    //   label: "Similarity",
+    // })
+    //   .loc(100, 400, level12)
+    //   .tap(() => {
+    //     animate();
+    //   });
+    // let continuityBtn = new Button({
+    //   label: "Continuity",
+    // })
+    //   .loc(1100, 600, level12)
+    //   .tap(() => {
+    //     animate();
+    //   });
+    // let commonFateBtn = new Button({
+    //   label: "Common fate",
+    // })
+    //   .loc(1100, 400, level12)
+    //   .tap(() => {
+    //     animate();
+    //   });
+    // let commonRegionBtn = new Button({
+    //   label: "Common region",
+    // })
+    //   .loc(1100, 200, level12)
+    //   .tap(() => {
+    //     animate();
+    //   });
 
-    createLevel11Lattice();
+    // createLevel11Lattice();
 
     // functionality: I have an array of principles. I have a function that get a random number. The number will the index to choose a random principle.
     // I will make as many blobs as needed for the initial lattice. The number of the blobs will remain throughout. Each blob will have the same amount of alternatives as the number of principles.
@@ -2129,12 +2129,6 @@ frame.on(
     };
 
     const removeDrawings = () => {
-      // if(stage.children.length > 1){
-      //   for(let i=0; i<stage.children.length; i++){
-      //     stage.children.pop()
-      //     stage.update()
-      //   }
-      // }
       for (let i = 0; i < drawings.length; i++) {
         drawings[i].removeFrom();
       }
