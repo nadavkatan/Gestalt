@@ -2516,7 +2516,7 @@ frame.on(
               pages.go(level10);
             }, 1000);
             level0.style.display = "flex";
-            introVideo.src = "https://www.youtube.com/embed/bIYsuxoCxmA";
+            introVideo.src = "https://www.youtube.com/embed/hQ8oFOpTUiY";
             break;
           case 10:
             if (currentNecklace === 8) {
@@ -2527,7 +2527,7 @@ frame.on(
               }, 1000);
               level0.style.display = "flex";
               startBtn.innerHTML = `<a href="https://informed-phrasing.netlify.app/chapter/6" style="text-decoration: none; color: black;">Go to chapter 6</a>`;
-              introVideo.src = "https://www.youtube.com/embed/HGaO7Ccs4q8";
+              introVideo.src = "https://www.youtube.com/embed/0oMxpZPRH04";
             } else {
               selectedGroups = [];
               removeDrawings();
