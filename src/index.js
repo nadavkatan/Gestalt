@@ -280,17 +280,27 @@ frame.on(
       return { text, index };
     };
 
-    // When the user answers correctly, he gets explanations about his/her intuition. This function matches the explanations to the current level.
-    const submitAnswer = async (level, selectedPoints) => {
-      const { text, index } = await getResponseText(selectedPoints);
+    const presentMessage = ({ text, btnText }) => {
       modalTextContainer.innerHTML = text
         ? text
         : "Your grouping intuition matches 0% of the previously submitted reports.";
 
-      nextLevelBtn.innerHTML = allowTryAgain ? "Try Again" : "Next level";
+      nextLevelBtn.innerHTML = btnText;
 
       modalLevel1.classList.remove("modal-hide");
       modalLevel1.classList.add("modal-in");
+    };
+
+    // When the user answers correctly, he gets explanations about his/her intuition. This function matches the explanations to the current level.
+    const submitAnswer = async (level, selectedPoints) => {
+      const { text, index } = await getResponseText(selectedPoints);
+      const message = {
+        text:
+          text ||
+          "Your grouping intuition matches 0% of the previously submitted reports.",
+        btnText: allowTryAgain ? "Try Again" : "Next level",
+      };
+      presentMessage(message);
 
       if (submittedForLevel < level && !allowTryAgain) {
         await updateLevelInfo();
@@ -548,7 +558,7 @@ frame.on(
       shape = new Shape().addTo();
       shape.s(pink).ss(5);
 
-      lineCords = [];
+      // lineCords = [];
       dampX.immediate(frame.mouseX);
       dampY.immediate(frame.mouseY);
       shape.mt(frame.mouseX, frame.mouseY);
@@ -566,8 +576,59 @@ frame.on(
       lineCords = [];
     };
 
+    function countContinuousLines(cursorPositions) {
+      if (!cursorPositions || cursorPositions.length === 0) {
+        return 0; // No lines if the array is empty
+      }
+
+      const distances = [];
+
+      // Calculate distances between consecutive points
+      for (let i = 1; i < cursorPositions.length; i++) {
+        const currentPos = cursorPositions[i];
+        const prevPos = cursorPositions[i - 1];
+
+        const distance = Math.sqrt(
+          Math.pow(currentPos.x - prevPos.x, 2) +
+            Math.pow(currentPos.y - prevPos.y, 2)
+        );
+
+        distances.push(distance);
+      }
+
+      if (distances.length === 0) {
+        return 1; // Only one line if there is only one point
+      }
+
+      // Calculate the average distance
+      const averageDistance =
+        distances.reduce((sum, distance) => sum + distance, 0) /
+        distances.length;
+
+      let lineCount = 1; // At least one line is present
+
+      // Check for distances at least triple the average distance
+      for (let i = 0; i < distances.length; i++) {
+        if (distances[i] >= 8 * averageDistance) {
+          lineCount++;
+        }
+      }
+
+      return lineCount;
+    }
+
     document.addEventListener("keydown", async (e) => {
       if (e.key === "Enter") {
+        if (level < 5 && countContinuousLines(lineCords) > 1) {
+          const message = {
+            text: "Make sure to select only one group and draw continuously.",
+            btnText: "Try again",
+          };
+          allowTryAgain = true;
+          presentMessage(message);
+          return;
+        }
+
         let sorted;
         switch (level) {
           case 1:
@@ -2446,7 +2507,9 @@ frame.on(
 
     const goToNextLevel = async (nextLevel) => {
       pages.go(nextLevel);
-      shape.removeFrom(stage);
+      removeDrawings();
+      lineCords = [];
+      // shape.removeFrom(stage);
       stage.update();
 
       // Fallback in case level somehow became undefined
@@ -2477,8 +2540,8 @@ frame.on(
       }, 1000);
 
       if (allowTryAgain) {
-        shape.removeFrom(stage);
-        stage.update();
+        removeDrawings();
+        lineCords = [];
         allowTryAgain = false;
       } else {
         switch (level) {
